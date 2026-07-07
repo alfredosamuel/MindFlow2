@@ -98,7 +98,10 @@
     .node-wrap { position: absolute; pointer-events: all; transition: opacity 0.2s; }
     .node-wrap.dimmed { opacity: 0.25; filter: grayscale(1); }
     .node-wrap.selected > .node { outline: 2px solid #4ade80; outline-offset: 3px; }
-    .node-wrap.group-member > .node { outline: 2px solid #facc15; outline-offset: 3px; }
+    .node-wrap.group-member > .node {
+      outline: 2px solid var(--group-color, #facc15);
+      outline-offset: 3px;
+    }
     .node { position: relative; border-radius: var(--radius-xl); cursor: grab; transition: box-shadow var(--tr), transform var(--tr); min-width: 90px; min-height: 36px; display: flex; align-items: center; justify-content: center; }
     .node:hover { transform: scale(1.03); }
     .node.dragging-node { opacity: 0.85; transform: scale(1.05); cursor: grabbing; }
@@ -710,6 +713,15 @@
       });
     }
     function drawGroups() {
+
+      nodes.forEach(n => {
+          const el = getNodeEl(n.id);
+          if (el) {
+            el.classList.remove('group-member');
+            el.style.removeProperty('--group-color'); // limpiar variable CSS
+          }
+        });
+      
       wrap.querySelectorAll('.group-el, .group-label-el').forEach(el=>el.remove());
       groups.forEach(g => {
         if (g.members.length<2) return;
