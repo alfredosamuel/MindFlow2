@@ -301,6 +301,7 @@
     let transform = { x: 0, y: 0, scale: 1 };
     let selectedIds = new Set();
     let undoStack = [], redoStack = [];
+    let saveTimer;
     let currentTheme = 'dark';
 
     let dragging = null, draggingOffset = {}, dragMultiStart = {};
