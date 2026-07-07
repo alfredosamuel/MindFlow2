@@ -37,7 +37,6 @@
     html { -webkit-font-smoothing: antialiased; }
     body { font-family: var(--font-body); background: var(--bg); color: var(--text); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; }
 
-    /* header principal con logo, búsqueda y acciones */
     #main-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: var(--space-3) var(--space-6); background: var(--surface);
@@ -58,13 +57,14 @@
     #search-input { background: none; border: none; outline: none; font-family: var(--font-body); font-size: var(--text-sm); color: var(--text); width: 100%; }
     #search-input::placeholder { color: var(--text-muted); }
 
-    /* barra de pestañas */
+    /* BARRA DE PESTAÑAS */
     #tab-bar {
       display: flex; align-items: center; gap: 2px;
       padding: var(--space-2) var(--space-6); background: var(--surface-2);
       border-bottom: 1px solid var(--border); z-index: 105; flex-shrink: 0;
       overflow-x: auto; overflow-y: hidden;
     }
+    #tab-list { display: flex; gap: 2px; flex-shrink: 0; }
     .tab {
       display: flex; align-items: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-4); border-radius: var(--radius-md) var(--radius-md) 0 0;
@@ -85,11 +85,11 @@
     #add-tab-btn {
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
       cursor: pointer; font-weight: 700; font-size: var(--text-sm); color: var(--text-muted);
-      background: transparent; border: none; transition: color var(--tr);
+      background: transparent; border: none; transition: color var(--tr); flex-shrink: 0;
     }
     #add-tab-btn:hover { color: var(--text); }
 
-    /* resto del CSS se mantiene igual */
+    /* resto igual */
     #canvas-wrap { flex: 1; position: relative; overflow: hidden; cursor: crosshair; }
     #canvas-wrap.panning { cursor: grabbing; }
     #canvas-wrap.selecting { cursor: crosshair; }
@@ -204,6 +204,8 @@
     <button class="btn btn-icon" id="theme-toggle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
   </div>
 </div>
+
+<!-- BARRA DE PESTAÑAS CORREGIDA -->
 <div id="tab-bar">
   <div id="tab-list"></div>
   <button id="add-tab-btn" title="Nueva pizarra">+</button>
@@ -288,16 +290,10 @@
 
 <script>
   (function() {
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // CONSTANTES
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     const COLORS = ['#f87171','#fb923c','#facc15','#4ade80','#22d3ee','#818cf8','#f472b6','#a3e635'];
     const GROUP_COLORS = ['#f87171','#fb923c','#facc15','#4ade80','#22d3ee','#818cf8','#f472b6','#a3e635','#ffffff'];
     const MAX_UNDO = 50;
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ESTADO GLOBAL (referencias a la pestaña activa)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     let nodes = [], edges = [], groups = [];
     let nextId = 1, nextGroupId = 1;
     let labelScale = 1;
@@ -306,7 +302,6 @@
     let undoStack = [], redoStack = [];
     let currentTheme = 'dark';
 
-    // Variables de interacción (no se guardan por pestaña)
     let dragging = null, draggingOffset = {}, dragMultiStart = {};
     let panning = false, panStart = {}, panOrigin = {};
     let selBoxActive = false, selStart = {}, selEnd = {};
@@ -316,8 +311,7 @@
     let ctxNodeId = null;
     let colorPopupTarget = null;
 
-    // Sistema de pestañas
-    let tabs = [];                 // array de { name, nodes, edges, groups, nextId, nextGroupId, transform, labelScale, undoStack, redoStack }
+    let tabs = [];
     let currentTabIndex = 0;
 
     const wrap = document.getElementById('canvas-wrap');
@@ -330,7 +324,7 @@
     const infoToggle = document.getElementById('info-toggle');
     const infoTime = document.getElementById('info-time');
     const miniCal = document.getElementById('mini-calendar');
-    const tabBar = document.getElementById('tab-bar');
+    const tabList = document.getElementById('tab-list');
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // GESTIÓN DE PESTAÑAS
@@ -375,21 +369,11 @@
       labelScale = tab.labelScale || 1;
       undoStack = tab.undoStack.slice();
       redoStack = tab.redoStack.slice();
-      // Asegurar que el estado cargado tenga al menos un nodo raíz si está vacío
-      if (nodes.length === 0) {
-        // Si el tab no tiene nodos, creamos uno por defecto
-        const rootId = addNodeInternal(null, '🧠 Mis tareas', 0, 0, 'root', '#ffffff');
-        // No queremos que esto entre en el undo stack de inmediato, así que vaciamos undoStack después
-        undoStack = [];
-        redoStack = [];
-        saveCurrentTabState(); // para guardar el nodo raíz creado
-      }
     }
 
     function switchToTab(index) {
       if (index === currentTabIndex) return;
       saveCurrentTabState();
-      // Limpiar UI actual
       nodeElements.forEach(el => el.remove());
       nodeElements.clear();
       selectedIds.clear();
@@ -405,14 +389,13 @@
     function createNewTab(name = 'Nueva pizarra') {
       saveCurrentTabState();
       const newTab = createDefaultTabState(name);
-      // Crear nodo raíz por defecto en la nueva pestaña
-      const tempNodes = newTab.nodes;
-      const tempEdges = newTab.edges;
-      const tempNextId = newTab.nextId;
-      // Simulamos la creación sin afectar el estado global actual
-      nodes = tempNodes;
-      edges = tempEdges;
-      nextId = tempNextId;
+      // Crear nodo raíz
+      const tempNodes = nodes;
+      const tempEdges = edges;
+      const tempNextId = nextId;
+      nodes = [];
+      edges = [];
+      nextId = 1;
       const rootId = addNodeInternal(null, '🧠 Mis tareas', 0, 0, 'root', '#ffffff');
       newTab.nodes = nodes;
       newTab.edges = edges;
@@ -447,7 +430,6 @@
       } else if (currentTabIndex === index) {
         currentTabIndex = Math.min(index, tabs.length - 1);
       }
-      // Limpiar UI
       nodeElements.forEach(el => el.remove());
       nodeElements.clear();
       selectedIds.clear();
@@ -466,9 +448,7 @@
       renderTabs();
     }
 
-    // Renderizar la barra de pestañas
     function renderTabs() {
-      const tabList = document.getElementById('tab-list');
       if (!tabList) return;
       tabList.innerHTML = '';
       tabs.forEach((tab, i) => {
@@ -518,7 +498,7 @@
     function scheduleSave() { clearTimeout(saveTimer); document.getElementById('save-status').textContent = '● Guardando...'; document.getElementById('save-status').style.color = 'var(--text-muted)'; saveTimer = setTimeout(saveState, 1200); }
     function saveState() {
       try {
-        saveCurrentTabState(); // Asegura que los datos actuales estén en el tab
+        saveCurrentTabState();
         const state = { tabs: tabs.map(tab => ({
             name: tab.name,
             nodes: tab.nodes,
@@ -565,7 +545,7 @@
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // GESTIÓN DE NODOS (sin cambios, usan las globales)
+    // GESTIÓN DE NODOS
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     function addNodeInternal(parentId, label, rx, ry, type, color, extra, skipUndo = false) {
       if (!skipUndo) pushUndo();
@@ -846,7 +826,7 @@
     function quickAddChildNode(parentId) {
       const parent = nodes.find(n => n.id === parentId);
       if (!parent) return;
-      const color = parent.color; // Hereda el color del padre
+      const color = parent.color;
       const type = parent.type === 'root' ? 'child' : 'grandchild';
       const angle = Math.random() * 2 * Math.PI;
       const dist = type === 'child' ? 280 : 160;
@@ -869,7 +849,7 @@
       toast('⚠️ No se pudo pegar');
     });
 
-    // Modal para "Añadir tema" (botón principal) y menú contextual "Añadir hijo"
+    // Modal
     function openFreeNodeModal(wx,wy){ freeNodePos={x:wx,y:wy}; pendingParentId=null; selectedColor=COLORS[Math.floor(Math.random()*COLORS.length)]; document.getElementById('modal-title').textContent='✦ Nuevo nodo libre'; document.getElementById('modal-input').value=''; document.getElementById('link-url-input').value=''; document.getElementById('node-type-select').value='text'; document.getElementById('link-url-input').style.display='none'; buildColorPicker(); document.getElementById('modal-overlay').classList.add('open'); setTimeout(()=>document.getElementById('modal-input').focus(),50); }
     function openModal(pid){ freeNodePos=null; pendingParentId=pid; const p=nodes.find(n=>n.id===pid); selectedColor=p?p.color:COLORS[Math.floor(Math.random()*COLORS.length)]; document.getElementById('modal-title').textContent=pid?`+ Sub-tarea de "${p?.label}"`:'Nuevo tema'; document.getElementById('modal-input').value=''; document.getElementById('link-url-input').value=''; document.getElementById('node-type-select').value='text'; document.getElementById('link-url-input').style.display='none'; buildColorPicker(); document.getElementById('modal-overlay').classList.add('open'); setTimeout(()=>document.getElementById('modal-input').focus(),50); }
     document.getElementById('node-type-select').addEventListener('change',function(){ const t=this.value; document.getElementById('link-url-input').style.display=t==='link'?'block':'none'; document.getElementById('modal-input').placeholder=t==='link'?'Nombre del enlace...':(t==='note'?'Escribe tu nota...':'¿Qué tienes que hacer?'); });
@@ -902,7 +882,7 @@
     document.getElementById('group-modal-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('group-modal-overlay'))closeGroupModal();});
     document.getElementById('group-confirm').addEventListener('click',()=>{ const name=document.getElementById('group-name-input').value.trim()||'Grupo'; pushUndo(); const gid=nextGroupId++; groups.push({id:gid,name,color:selectedGroupColor,members:[...selectedIds]}); syncNodes(); closeGroupModal(); scheduleSave(); toast(`✦ Grupo "${name}" creado`); });
 
-    // Menú contextual de nodo
+    // Menú contextual
     function showCtxMenu(e,nodeId){ ctxNodeId=nodeId; const menu=document.getElementById('ctx-menu'); const node=nodes.find(n=>n.id===nodeId); document.getElementById('ctx-link').style.display=node?.nodeKind==='link'?'flex':'none'; menu.style.left=`${Math.min(e.clientX,window.innerWidth-200)}px`; menu.style.top=`${Math.min(e.clientY,window.innerHeight-200)}px`; menu.classList.add('open'); closeColorPopup(); }
     function closeCtxMenu(){ document.getElementById('ctx-menu').classList.remove('open'); ctxNodeId=null; }
     document.addEventListener('click',e=>{if(!e.target.closest('#ctx-menu')&&!e.target.closest('#color-popup'))closeCtxMenu();});
@@ -949,11 +929,12 @@
     function updateCount(){ document.getElementById('node-count').textContent=nodes.length+' nodos'; }
     window.addEventListener('resize',updatePositions);
 
-    // Reloj y mini calendario
+    // Reloj
     function updateClock() { infoTime.textContent = new Date().toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit', second:'2-digit' }); }
     setInterval(updateClock, 1000);
     updateClock();
 
+    // Mini calendario
     function renderMiniCalendar() {
       const now = new Date();
       const year = now.getFullYear(), month = now.getMonth();
@@ -983,7 +964,7 @@
     fontSlider.value = labelScale;
     fontSlider.addEventListener('input', () => { labelScale = parseFloat(fontSlider.value); applyLabelScale(); scheduleSave(); });
 
-    // Export/Import (ahora guarda todas las pestañas)
+    // Export/Import
     function exportJSON() {
       saveCurrentTabState();
       const state = { tabs: tabs.map(tab => ({
@@ -1050,14 +1031,11 @@
     function init() {
       const loaded = loadState();
       if (!loaded) {
-        // Crear primera pestaña por defecto
         const defaultTab = createDefaultTabState('Pizarra 1');
         tabs = [defaultTab];
         currentTabIndex = 0;
         loadTabState(0);
-        // Crear nodo raíz en la pestaña por defecto
         const rootId = addNodeInternal(null, '🧠 Mis tareas', 0, 0, 'root', '#ffffff');
-        // nodos hijos de ejemplo
         const p1 = addNodeInternal(rootId, '💻 Trading Bot', -320, -200, 'child', '#818cf8');
         addNodeInternal(p1, 'Backtest', -80, -120, 'grandchild', '#818cf8');
         addNodeInternal(p1, 'Live test', -80, -50, 'grandchild', '#818cf8');
@@ -1093,7 +1071,6 @@
       if (hint.classList.contains('collapsed')) hintToggle.textContent = '▼'; else hintToggle.textContent = '▲';
     }
 
-    // Botón "+" pestaña
     document.getElementById('add-tab-btn').addEventListener('click', () => createNewTab());
 
     init();
