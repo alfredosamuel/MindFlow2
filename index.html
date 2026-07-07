@@ -205,7 +205,7 @@
   </div>
 </div>
 <div id="tab-bar">
-  <!-- Las pestañas se generan dinámicamente -->
+  <div id="tab-list"></div>
   <button id="add-tab-btn" title="Nueva pizarra">+</button>
 </div>
 
@@ -468,9 +468,9 @@
 
     // Renderizar la barra de pestañas
     function renderTabs() {
-      // Limpiar barra, dejando el botón "+"
-      const addBtn = document.getElementById('add-tab-btn');
-      tabBar.innerHTML = '';
+      const tabList = document.getElementById('tab-list');
+      if (!tabList) return;
+      tabList.innerHTML = '';
       tabs.forEach((tab, i) => {
         const tabEl = document.createElement('div');
         tabEl.className = 'tab' + (i === currentTabIndex ? ' active' : '');
@@ -487,9 +487,8 @@
           const newName = prompt('Renombrar pestaña:', tab.name);
           if (newName !== null) renameTab(i, newName);
         });
-        tabBar.appendChild(tabEl);
+        tabList.appendChild(tabEl);
       });
-      tabBar.appendChild(addBtn);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
