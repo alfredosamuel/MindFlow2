@@ -185,6 +185,7 @@
     .cal-table th { padding: 2px; color: var(--text-muted); font-weight: 600; }
     .cal-table td { padding: 2px; text-align: center; border-radius: 4px; }
     .cal-table td.today { background: #4ade80; color: #0a1a0e; font-weight: 900; }
+    #tab-list { min-height: 30px; background: red !important; }
   </style>
 </head>
 <body>
@@ -449,7 +450,10 @@
     }
 
     function renderTabs() {
-      if (!tabList) return;
+      if (!tabList) {
+        console.error('No se encontró #tab-list');
+        return;
+      }
       tabList.innerHTML = '';
       tabs.forEach((tab, i) => {
         const tabEl = document.createElement('div');
@@ -469,6 +473,7 @@
         });
         tabList.appendChild(tabEl);
       });
+      console.log('🟢 Pestañas renderizadas:', tabList.children.length);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1069,6 +1074,9 @@
       fontSlider.value = labelScale; applyLabelScale();
       if (infoPanel.classList.contains('collapsed')) infoToggle.textContent = '▼'; else infoToggle.textContent = '▲';
       if (hint.classList.contains('collapsed')) hintToggle.textContent = '▼'; else hintToggle.textContent = '▲';
+      console.log('🟢 init terminado. Tabs:', tabs.length);
+      // Forzamos un renderizado extra por seguridad
+      setTimeout(() => renderTabs(), 100);
     }
 
     document.getElementById('add-tab-btn').addEventListener('click', () => createNewTab());
