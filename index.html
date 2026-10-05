@@ -2,9 +2,10 @@
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>MindFlow — Tu Mapa Mental</title>
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,900;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
   <style>
     :root {
       --font-body: 'Satoshi', 'Inter', sans-serif;
@@ -26,12 +27,13 @@
       --shadow-md: 0 4px 20px rgba(0,0,0,0.5);
       --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
     }
+    /* Modo claro: escala de grises, sin blancos */
     [data-theme="light"] {
-      --bg: #f5f4f0; --surface: #faf9f7; --surface-2: #ffffff;
-      --border: rgba(0,0,0,0.08); --text: #1c1a18;
-      --text-muted: #7a7876; --text-faint: #c8c6c2;
-      --shadow-md: 0 4px 20px rgba(0,0,0,0.1);
-      --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
+      --bg: #c2c2c0; --surface: #d0d0ce; --surface-2: #dcdcda;
+      --border: rgba(0,0,0,0.14); --text: #1a1a1a;
+      --text-muted: #55534f; --text-faint: #9a9896;
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.14);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.2);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-font-smoothing: antialiased; }
@@ -57,7 +59,6 @@
     #search-input { background: none; border: none; outline: none; font-family: var(--font-body); font-size: var(--text-sm); color: var(--text); width: 100%; }
     #search-input::placeholder { color: var(--text-muted); }
 
-    /* BARRA DE PESTAÑAS */
     #tab-bar {
       display: flex; align-items: center; gap: 2px;
       padding: var(--space-2) var(--space-6); background: var(--surface-2);
@@ -89,7 +90,6 @@
     }
     #add-tab-btn:hover { color: var(--text); }
 
-    /* resto igual */
     #canvas-wrap { flex: 1; position: relative; overflow: hidden; cursor: crosshair; }
     #canvas-wrap.panning { cursor: grabbing; }
     #canvas-wrap.selecting { cursor: crosshair; }
@@ -98,14 +98,11 @@
     .node-wrap { position: absolute; pointer-events: all; transition: opacity 0.2s; }
     .node-wrap.dimmed { opacity: 0.25; filter: grayscale(1); }
     .node-wrap.selected > .node { outline: 2px solid #4ade80; outline-offset: 3px; }
-    .node-wrap.group-member > .node {
-      outline: 2px solid var(--group-color, #facc15);
-      outline-offset: 3px;
-    }
+    .node-wrap.group-member > .node { outline: 2px solid var(--group-color, #facc15); outline-offset: 3px; }
     .node { position: relative; border-radius: var(--radius-xl); cursor: grab; transition: box-shadow var(--tr), transform var(--tr); min-width: 90px; min-height: 36px; display: flex; align-items: center; justify-content: center; }
     .node:hover { transform: scale(1.03); }
     .node.dragging-node { opacity: 0.85; transform: scale(1.05); cursor: grabbing; }
-    .node.root { background: var(--surface-2); border: 2px solid rgba(255,255,255,0.15); padding: var(--space-4) var(--space-6); min-width: 160px; box-shadow: var(--shadow-lg), 0 0 40px rgba(255,255,255,0.04); }
+    .node.root { background: var(--surface-2); border: 2px solid rgba(128,128,128,0.35); padding: var(--space-4) var(--space-6); min-width: 160px; box-shadow: var(--shadow-lg), 0 0 40px rgba(255,255,255,0.04); }
     .node.child { padding: var(--space-3) var(--space-4); min-width: 120px; box-shadow: var(--shadow-md); }
     .node.free { padding: var(--space-3) var(--space-4); min-width: 100px; box-shadow: var(--shadow-md); }
     .node.grandchild { padding: var(--space-2) var(--space-3); min-width: 80px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); border-radius: var(--radius-lg); }
@@ -115,15 +112,22 @@
     .node-link-url { font-size: 10px; opacity: 0.6; text-decoration: underline; word-break: break-all; max-width: 160px; pointer-events: all; cursor: pointer; }
     .node.file-node { padding: var(--space-3) var(--space-4); flex-direction: column; gap: var(--space-1); min-width: 130px; }
     .node-file-icon { font-size: 22px; }
-    .node.note-node { background: transparent !important; border-style: dashed !important; border-width: 2px !important; padding: var(--space-3) var(--space-4); min-width: 140px; min-height: 60px; align-items: flex-start; border-radius: var(--radius-lg); }
+    .node.note-node { border-style: dashed !important; border-width: 2px !important; padding: var(--space-3) var(--space-4); min-width: 140px; min-height: 60px; align-items: flex-start; border-radius: var(--radius-lg); }
+
+    /* Texto libre estilo Figma: sin caja, sin borde, solo texto */
+    .node.free-text { background: var(--bg); border: 2px solid transparent; box-shadow: none; padding: var(--space-1) var(--space-2); min-width: 40px; min-height: 28px; border-radius: var(--radius-sm); justify-content: flex-start; }
+    .node.free-text:hover { transform: none; border-color: rgba(128,128,128,0.45); }
+    .node.free-text .node-label { text-align: left; white-space: pre-wrap; max-width: 420px; font-weight: 500; font-size: calc(var(--label-scale) * var(--text-base)); line-height: 1.4; }
+    .node.free-text .node-edit-input { text-align: left; font-size: calc(var(--label-scale) * var(--text-base)); font-weight: 500; line-height: 1.4; min-width: 3ch; white-space: pre; }
+
     .node-label { font-weight: 700; font-size: calc(var(--label-scale) * var(--text-sm)); line-height: 1.3; word-break: break-word; max-width: 180px; pointer-events: none; text-align: center; }
     .node.root .node-label { font-size: calc(var(--label-scale) * var(--text-base)); font-weight: 900; }
     .node.grandchild .node-label { font-size: calc(var(--label-scale) * var(--text-xs)); font-weight: 600; }
     .node.note-node .node-label { text-align: left; font-weight: 500; opacity: 0.9; font-size: calc(var(--label-scale) * var(--text-sm)); }
-    .node-edit-input { background: transparent; border: none; outline: none; font-family: var(--font-body); font-weight: 700; font-size: var(--text-sm); text-align: center; width: 100%; color: inherit; padding: 0; resize: none; overflow: hidden; min-width: 60px; }
-    .node-add-btn { position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%); width: 24px; height: 24px; border-radius: var(--radius-full); border: none; background: rgba(255,255,255,0.15); color: var(--text); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity var(--tr), background var(--tr); pointer-events: all; z-index: 10; font-weight: 900; }
+    .node-edit-input { background: transparent; border: none; outline: none; font-family: var(--font-body); font-weight: 700; font-size: var(--text-sm); text-align: center; width: 100%; color: inherit; padding: 0; resize: none; overflow: hidden; min-width: 60px; user-select: text; }
+    .node-add-btn { position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%); width: 24px; height: 24px; border-radius: var(--radius-full); border: none; background: rgba(128,128,128,0.3); color: var(--text); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity var(--tr), background var(--tr); pointer-events: all; z-index: 10; font-weight: 900; }
     .node-wrap:hover .node-add-btn { opacity: 1; }
-    .node-add-btn:hover { background: rgba(255,255,255,0.3); }
+    .node-add-btn:hover { background: rgba(128,128,128,0.5); }
     .node-del-btn { position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; border-radius: var(--radius-full); border: none; background: #f87171; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity var(--tr); pointer-events: all; z-index: 10; font-weight: 900; }
     .node-wrap:hover .node-del-btn { opacity: 1; }
     .node-wrap.root-wrap .node-del-btn { display: none; }
@@ -141,13 +145,13 @@
     #modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-6); width: min(400px, 90vw); box-shadow: var(--shadow-lg); animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     #modal h2 { font-size: var(--text-lg); font-weight: 900; margin-bottom: var(--space-4); }
-    #modal-input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); color: var(--text); font-family: var(--font-body); font-size: var(--text-base); font-weight: 600; outline: none; transition: border-color var(--tr); margin-bottom: var(--space-4); }
+    #modal-input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); color: var(--text); font-family: var(--font-body); font-size: var(--text-base); font-weight: 600; outline: none; transition: border-color var(--tr); margin-bottom: var(--space-4); user-select: text; }
     #modal-input:focus { border-color: #4ade80; }
     #node-type-select { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); color: var(--text); font-family: var(--font-body); font-size: var(--text-base); font-weight: 600; outline: none; margin-bottom: var(--space-4); }
     #link-url-input { display: none; width: 100%; margin-bottom: var(--space-4); }
-    .color-picker { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4); }
-    .color-dot { width: 28px; height: 28px; border-radius: var(--radius-full); cursor: pointer; border: 3px solid transparent; transition: transform var(--tr), border-color var(--tr); }
-    .color-dot.active, .color-dot:hover { transform: scale(1.2); border-color: rgba(255,255,255,0.5); }
+    .color-picker, .group-color-row { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4); }
+    .color-dot, .gcol-dot { width: 28px; height: 28px; border-radius: var(--radius-full); cursor: pointer; border: 3px solid transparent; transition: transform var(--tr), border-color var(--tr); }
+    .color-dot.active, .color-dot:hover, .gcol-dot.active, .gcol-dot:hover { transform: scale(1.2); border-color: rgba(128,128,128,0.7); }
     .modal-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
     #ctx-menu { position: fixed; z-index: 2000; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: var(--space-2); min-width: 180px; display: none; animation: modalIn 0.15s cubic-bezier(0.16, 1, 0.3, 1); }
     #ctx-menu.open { display: block; }
@@ -157,7 +161,7 @@
     .ctx-sep { height: 1px; background: var(--border); margin: var(--space-2) 0; }
     #color-popup { position: fixed; z-index: 2100; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-3); display: none; flex-wrap: wrap; gap: var(--space-2); box-shadow: var(--shadow-lg); }
     #color-popup.open { display: flex; }
-    #hint { position: absolute; top: var(--space-4); right: var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); font-size: 11px; color: var(--text-muted); line-height: 2; max-width: 210px; z-index: 50; pointer-events: all; transition: all 0.2s; }
+    #hint { position: absolute; top: var(--space-4); right: var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); font-size: 11px; color: var(--text-muted); line-height: 2; max-width: 230px; z-index: 50; pointer-events: all; transition: all 0.2s; }
     #hint-content { transition: opacity 0.2s; }
     #hint.collapsed #hint-content { display: none; }
     #hint-toggle { position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); }
@@ -188,28 +192,67 @@
     .cal-table th { padding: 2px; color: var(--text-muted); font-weight: 600; }
     .cal-table td { padding: 2px; text-align: center; border-radius: 4px; }
     .cal-table td.today { background: #4ade80; color: #0a1a0e; font-weight: 900; }
-    
+    /* Texto de nodos en Inter */
+    .node-label, .node-edit-input { font-family: 'Inter', 'Satoshi', sans-serif; }
+
+    /* Barra de formato */
+    #fmt-bar { position: absolute; top: var(--space-4); left: 50%; transform: translateX(-50%); display: none; align-items: center; gap: var(--space-1); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-full); padding: var(--space-1) var(--space-3); box-shadow: var(--shadow-lg); z-index: 60; }
+    #fmt-bar.show { display: flex; }
+    .fmt-btn { min-width: 30px; height: 30px; padding: 0 var(--space-2); border-radius: var(--radius-full); border: none; background: transparent; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; transition: background var(--tr); }
+    .fmt-btn:hover { background: var(--surface-2); }
+    .fmt-btn.active { background: #4ade80; color: #0a1a0e; }
+    #fmt-size { width: 52px; height: 28px; text-align: center; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; outline: none; user-select: text; }
+    #fmt-size:focus { border-color: #4ade80; }
+    .fmt-sep { width: 1px; height: 18px; background: var(--border); margin: 0 var(--space-1); }
+    /* Táctil / móvil */
+    body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+    #canvas-wrap, .node-wrap { touch-action: none; }
+    input, textarea { -webkit-user-select: text; user-select: text; }
+    .node-wrap.selected .node-add-btn, .node-wrap.selected .node-del-btn { opacity: 1; }
+    .zoom-btn.active { background: #4ade80; color: #0a1a0e; }
+    #cloud-status { white-space: nowrap; }
+    #btn-auth img { display: block; }
+    @media (pointer: coarse) {
+      .node-add-btn { width: 32px; height: 32px; bottom: -18px; font-size: 20px; }
+      .node-del-btn { width: 28px; height: 28px; top: -14px; right: -14px; font-size: 16px; }
+      .zoom-btn { width: 38px; height: 38px; }
+      .fmt-btn { min-width: 38px; height: 38px; }
+      #fmt-size { height: 36px; }
+    }
+    @media (max-width: 720px) {
+      #main-header { padding: var(--space-2) var(--space-3); gap: var(--space-2); }
+      .lbl { display: none; }
+      .btn { padding: var(--space-2) var(--space-3); }
+      #search-bar { max-width: none; min-width: 0; padding: var(--space-2) var(--space-3); }
+      .header-actions { gap: var(--space-1); }
+      #tab-bar { padding: var(--space-1) var(--space-3); }
+      #panel { bottom: calc(var(--space-3) + env(safe-area-inset-bottom)); max-width: calc(100vw - 16px); padding: var(--space-1) var(--space-3); gap: var(--space-1); overflow-x: auto; }
+      #panel .panel-label:not(#save-status):not(#cloud-status) { display: none; }
+      #font-slider { width: 60px; }
+      #fmt-bar { top: auto; bottom: calc(68px + env(safe-area-inset-bottom)); max-width: calc(100vw - 16px); overflow-x: auto; }
+      #toast { bottom: 130px; }
+    }
   </style>
 </head>
 <body>
 <div id="main-header">
   <div class="logo">
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="5" fill="#4ade80"/><circle cx="6" cy="8" r="3.5" fill="#f87171"/><circle cx="26" cy="8" r="3.5" fill="#818cf8"/><circle cx="6" cy="24" r="3.5" fill="#fb923c"/><circle cx="26" cy="24" r="3.5" fill="#22d3ee"/><line x1="11" y1="14" x2="8.5" y2="10.5" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/><line x1="21" y1="14" x2="23.5" y2="10.5" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/><line x1="11" y1="18" x2="8.5" y2="21.5" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/><line x1="21" y1="18" x2="23.5" y2="21.5" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/></svg>
-    MindFlow
+    <span class="lbl">MindFlow</span>
   </div>
   <div id="search-bar">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input type="text" id="search-input" placeholder="Buscar nodo..."/>
   </div>
   <div class="header-actions">
-    <button class="btn btn-primary" id="btn-add-topic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Añadir tema</button>
-    <button class="btn" id="btn-export" title="Exportar como JSON"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar</button>
-    <label class="btn" style="cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar<input type="file" id="btn-import" accept=".json" style="display:none;"/></label>
+    <button class="btn btn-primary" id="btn-add-topic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">Añadir tema</span></button>
+    <button class="btn" id="btn-export" title="Exportar como JSON"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lbl">Exportar</span></button>
+    <label class="btn" style="cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span class="lbl">Importar</span><input type="file" id="btn-import" accept=".json" style="display:none;"/></label>
+    <button class="btn" id="btn-auth" title="Entrar con Google"><span id="auth-icon" style="display:inline-flex;"><svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></span><span class="lbl" id="auth-label">Entrar con Google</span></button>
     <button class="btn btn-icon" id="theme-toggle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
   </div>
 </div>
 
-<!-- BARRA DE PESTAÑAS CORREGIDA -->
 <div id="tab-bar">
   <div id="tab-list"></div>
   <button id="add-tab-btn" title="Nueva pizarra">+</button>
@@ -218,6 +261,18 @@
 <div id="canvas-wrap">
   <canvas id="canvas"></canvas>
   <div id="sel-box"></div>
+
+  <div id="fmt-bar">
+    <button class="fmt-btn" id="fmt-dec" title="Reducir tamaño">A−</button>
+    <input type="number" id="fmt-size" min="8" max="200" title="Tamaño de letra (px)">
+    <button class="fmt-btn" id="fmt-inc" title="Aumentar tamaño">A+</button>
+    <div class="fmt-sep"></div>
+    <button class="fmt-btn" id="fmt-bold" title="Negrita (Ctrl+B)"><b>B</b></button>
+    <button class="fmt-btn" id="fmt-italic" title="Cursiva (Ctrl+I)"><i>I</i></button>
+    <div class="fmt-sep"></div>
+    <button class="fmt-btn" id="fmt-group" title="Agrupar selección" style="display:none">▣</button>
+    <button class="fmt-btn" id="fmt-del" title="Eliminar selección">🗑</button>
+  </div>
 
   <div id="info-panel">
     <div id="info-toggle" title="Minimizar panel">▲</div>
@@ -231,7 +286,10 @@
     <div id="hint-toggle" title="Minimizar atajos">▲</div>
     <div id="hint-content">
       <strong>⌨️ Shortcuts:</strong><br>
-      <kbd>T</kbd> crear nodo libre<br>
+      <kbd>T</kbd> o <kbd>doble clic</kbd> en vacío: texto libre<br>
+      <kbd>Enter</kbd> salto de línea (texto libre)<br>
+      <kbd>Esc</kbd> terminar de escribir<br>
+      <kbd>Ctrl+B</kbd> negrita · <kbd>Ctrl+I</kbd> cursiva<br>
       <kbd>Ctrl+V</kbd> pegar imagen/link/texto<br>
       <kbd>Ctrl+clic+drag</kbd> selección múltiple<br>
       <kbd>Ctrl+G</kbd> agrupar selección<br>
@@ -239,7 +297,7 @@
       <kbd>Ctrl+Z</kbd> deshacer<br>
       <kbd>Ctrl+Y</kbd> rehacer<br>
       <kbd>Del</kbd> eliminar seleccionados<br>
-      <kbd>Doble clic</kbd> editar nodo<br>
+      <kbd>Doble clic</kbd> en nodo: editar<br>
       <kbd>Clic der</kbd> menú contextual<br>
       <kbd>Scroll</kbd> zoom<br>
       <kbd>Arrastra grupo</kbd> mover todo el grupo
@@ -248,6 +306,9 @@
 </div>
 
 <div id="panel">
+  <button class="zoom-btn" id="btn-text" title="Nuevo texto" style="font-family:'Inter',sans-serif;font-size:14px;">T</button>
+  <button class="zoom-btn" id="btn-select" title="Selección múltiple" style="font-size:14px;">⬚</button>
+  <div class="divider"></div>
   <span class="panel-label">Zoom</span>
   <button class="zoom-btn" id="zoom-out">−</button>
   <button class="zoom-btn" id="zoom-reset" style="font-size:12px;font-weight:900;">100%</button>
@@ -259,6 +320,8 @@
   <span class="panel-label" id="node-count">0 nodos</span>
   <div class="divider"></div>
   <span class="panel-label" id="save-status" style="color:#4ade80;">✓ Guardado</span>
+  <div class="divider" id="cloud-div" style="display:none"></div>
+  <span class="panel-label" id="cloud-status" style="display:none"></span>
 </div>
 
 <div id="modal-overlay" role="dialog" aria-modal="true">
@@ -275,7 +338,7 @@
 <div id="group-modal-overlay" role="dialog" aria-modal="true" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1000;">
   <div id="group-modal" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:var(--space-6);width:min(380px,90vw);box-shadow:var(--shadow-lg);animation:modalIn 0.25s cubic-bezier(0.16,1,0.3,1)">
     <h2 style="font-size:var(--text-lg);font-weight:900;margin-bottom:var(--space-4);">Nombrar grupo</h2>
-    <input type="text" id="group-name-input" placeholder="Nombre del grupo..." autocomplete="off" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);color:var(--text);font-family:var(--font-body);font-size:var(--text-base);font-weight:600;outline:none;transition:border-color var(--tr);margin-bottom:var(--space-4);">
+    <input type="text" id="group-name-input" placeholder="Nombre del grupo..." autocomplete="off" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);color:var(--text);font-family:var(--font-body);font-size:var(--text-base);font-weight:600;outline:none;transition:border-color var(--tr);margin-bottom:var(--space-4);user-select:text;">
     <div class="group-color-row" id="group-color-row"></div>
     <div style="display:flex;gap:var(--space-2);justify-content:flex-end;"><button class="btn" id="group-cancel">Cancelar</button><button class="btn btn-primary" id="group-confirm">Crear grupo</button></div>
   </div>
@@ -315,6 +378,11 @@
     let pendingParentId = null, selectedColor = '#4ade80', freeNodePos = null;
     let ctxNodeId = null;
     let colorPopupTarget = null;
+    let editingId = null;
+    let selectMode = false, nodeDragged = false, dragStartClient = { x: 0, y: 0 }, dragPointerId = null;
+    let lastTap = { id: null, t: 0 }, lastEmptyTap = { t: 0, x: 0, y: 0 };
+    let ctxOpenedAt = 0, longPressTimer = null, panMoved = false, panPointerId = null, savePending = false;
+    const touches = new Map(); let pinch = null;
 
     let tabs = [];
     let currentTabIndex = 0;
@@ -330,119 +398,145 @@
     const infoTime = document.getElementById('info-time');
     const miniCal = document.getElementById('mini-calendar');
     const tabList = document.getElementById('tab-list');
+    const fmtBar = document.getElementById('fmt-bar');
+    const fmtSize = document.getElementById('fmt-size');
+
+    // En modo claro los colores pastel se oscurecen para que se lean sobre el fondo gris
+    function dc(c) {
+      if (currentTheme !== 'light' || !/^#[0-9a-f]{6}$/i.test(c)) return c;
+      const k = 0.5, h = i => Math.round(parseInt(c.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0');
+      return '#' + h(1) + h(3) + h(5);
+    }
+    // Relleno opaco (tinte sobre el fondo) para que los cables no se vean a través de la tarjeta
+    function fill(c, a) { const t = c + a; return `linear-gradient(${t}, ${t}), var(--bg)`; }
+    function fa() { return currentTheme === 'light' ? '2e' : '18'; }
+    // ━━━ Formato de texto por nodo (tamaño, negrita, cursiva) ━━━
+    function applyFormat(node, el) {
+      el.querySelectorAll('.node-label, .node-edit-input').forEach(t => {
+        t.style.fontSize = node.fontSize ? `calc(var(--label-scale) * ${node.fontSize}px)` : '';
+        t.style.fontWeight = node.bold === undefined ? '' : (node.bold ? 700 : 400);
+        t.style.fontStyle = node.italic ? 'italic' : '';
+      });
+    }
+    function fmtTargets() {
+      const ids = editingId !== null ? [editingId] : [...selectedIds];
+      return ids.map(id => nodes.find(n => n.id === id)).filter(Boolean);
+    }
+    function curSize(n) {
+      const l = getNodeEl(n.id)?.querySelector('.node-label');
+      return l ? Math.round(parseFloat(getComputedStyle(l).fontSize) / labelScale) : 15;
+    }
+    function effBold(n) { return n.bold ?? !isFreeText(n); }
+    function updateFmtBar() {
+      const t = fmtTargets();
+      fmtBar.classList.toggle('show', t.length > 0);
+      document.getElementById('fmt-del').style.display = editingId === null ? '' : 'none';
+      document.getElementById('fmt-group').style.display = (editingId === null && selectedIds.size > 1) ? '' : 'none';
+      if (!t.length) return;
+      const n = t[0];
+      if (document.activeElement !== fmtSize) fmtSize.value = curSize(n);
+      document.getElementById('fmt-bold').classList.toggle('active', effBold(n));
+      document.getElementById('fmt-italic').classList.toggle('active', !!n.italic);
+    }
+    function setFmt(fn) {
+      const t = fmtTargets(); if (!t.length) return;
+      pushUndo();
+      t.forEach(n => { fn(n); const w = getNodeEl(n.id); if (w) applyFormat(n, w.querySelector('.node')); });
+      updatePositions(); updateFmtBar(); scheduleSave();
+    }
+    function toggleFmt(kind) {
+      const first = fmtTargets()[0]; if (!first) return;
+      if (kind === 'bold') { const v = !effBold(first); setFmt(n => { n.bold = v; }); }
+      else { const v = !first.italic; setFmt(n => { n.italic = v; }); }
+    }
+    const clampSize = v => Math.min(200, Math.max(8, Math.round(v)));
+    fmtBar.addEventListener('mousedown', e => { if (e.target !== fmtSize) e.preventDefault(); e.stopPropagation(); });
+    fmtBar.addEventListener('pointerdown', e => e.stopPropagation());
+    document.getElementById('fmt-del').addEventListener('click', () => { if (editingId === null) deleteSelected(); });
+    document.getElementById('fmt-group').addEventListener('click', () => openGroupModal());
+    document.getElementById('fmt-dec').addEventListener('click', () => setFmt(n => { n.fontSize = clampSize(curSize(n) - 2); }));
+    document.getElementById('fmt-inc').addEventListener('click', () => setFmt(n => { n.fontSize = clampSize(curSize(n) + 2); }));
+    document.getElementById('fmt-bold').addEventListener('click', () => toggleFmt('bold'));
+    document.getElementById('fmt-italic').addEventListener('click', () => toggleFmt('italic'));
+    fmtSize.addEventListener('change', () => { const v = parseFloat(fmtSize.value); if (v > 0) setFmt(n => { n.fontSize = clampSize(v); }); });
+    fmtSize.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' || e.key === 'Escape') fmtSize.blur(); });
+
+    function isFreeText(node) { return node.type === 'free' && (!node.nodeKind || node.nodeKind === 'text'); }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // GESTIÓN DE PESTAÑAS
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     function createDefaultTabState(name = 'Pizarra 1') {
       return {
-        name,
-        nodes: [],
-        edges: [],
-        groups: [],
-        nextId: 1,
-        nextGroupId: 1,
+        name, nodes: [], edges: [], groups: [], nextId: 1, nextGroupId: 1,
         transform: { x: wrap.clientWidth/2, y: wrap.clientHeight/2, scale: 1 },
-        labelScale: 1,
-        undoStack: [],
-        redoStack: []
+        labelScale: 1, undoStack: [], redoStack: []
       };
     }
 
     function saveCurrentTabState() {
       if (tabs.length === 0) return;
       const tab = tabs[currentTabIndex];
-      tab.nodes = nodes;
-      tab.edges = edges;
-      tab.groups = groups;
-      tab.nextId = nextId;
-      tab.nextGroupId = nextGroupId;
-      tab.transform = { ...transform };
-      tab.labelScale = labelScale;
-      tab.undoStack = undoStack.slice();
-      tab.redoStack = redoStack.slice();
+      tab.nodes = nodes; tab.edges = edges; tab.groups = groups;
+      tab.nextId = nextId; tab.nextGroupId = nextGroupId;
+      tab.transform = { ...transform }; tab.labelScale = labelScale;
+      tab.undoStack = undoStack.slice(); tab.redoStack = redoStack.slice();
     }
 
     function loadTabState(index) {
       const tab = tabs[index];
-      nodes = tab.nodes;
-      edges = tab.edges;
-      groups = tab.groups;
-      nextId = tab.nextId;
-      nextGroupId = tab.nextGroupId;
+      nodes = tab.nodes; edges = tab.edges; groups = tab.groups;
+      nextId = tab.nextId; nextGroupId = tab.nextGroupId;
       transform = tab.transform ? { ...tab.transform } : { x: wrap.clientWidth/2, y: wrap.clientHeight/2, scale: 1 };
       labelScale = tab.labelScale || 1;
-      undoStack = tab.undoStack.slice();
-      redoStack = tab.redoStack.slice();
+      undoStack = tab.undoStack.slice(); redoStack = tab.redoStack.slice();
+    }
+
+    function resetCanvasView() {
+      nodeElements.forEach(el => el.remove());
+      nodeElements.clear();
+      selectedIds.clear();
+      fontSlider.value = labelScale;
+      applyLabelScale();
+      syncNodes();
+      updateAllSelectedClass();
+      document.getElementById('zoom-reset').textContent = Math.round(transform.scale*100)+'%';
+      renderTabs();
     }
 
     function switchToTab(index) {
       if (index === currentTabIndex) return;
       saveCurrentTabState();
-      nodeElements.forEach(el => el.remove());
-      nodeElements.clear();
-      selectedIds.clear();
       currentTabIndex = index;
       loadTabState(index);
-      applyLabelScale();
-      syncNodes();
-      updateAllSelectedClass();
+      resetCanvasView();
       scheduleSave();
-      renderTabs();
     }
 
     function createNewTab(name = 'Nueva pizarra') {
       saveCurrentTabState();
-      const newTab = createDefaultTabState(name);
-      // Crear nodo raíz
-      const tempNodes = nodes;
-      const tempEdges = edges;
-      const tempNextId = nextId;
-      nodes = [];
-      edges = [];
-      nextId = 1;
-      const rootId = addNodeInternal(null, '🧠 Mis tareas', 0, 0, 'root', '#ffffff');
-      newTab.nodes = nodes;
-      newTab.edges = edges;
-      newTab.nextId = nextId;
-      newTab.undoStack = [];
-      newTab.redoStack = [];
-      tabs.push(newTab);
-      const newIndex = tabs.length - 1;
-      // Limpiar UI actual
-      nodeElements.forEach(el => el.remove());
-      nodeElements.clear();
-      selectedIds.clear();
-      currentTabIndex = newIndex;
-      loadTabState(newIndex);
-      applyLabelScale();
-      syncNodes();
+      nodes = []; edges = []; groups = [];
+      nextId = 1; nextGroupId = 1; labelScale = 1;
+      undoStack = []; redoStack = [];
+      transform = { x: wrap.clientWidth/2, y: wrap.clientHeight/2, scale: 1 };
+      addNodeInternal(null, '🧠 Mis tareas', 0, 0, 'root', '#ffffff', undefined, true);
+      tabs.push(createDefaultTabState(name));
+      currentTabIndex = tabs.length - 1;
+      saveCurrentTabState();
+      resetCanvasView();
       scheduleSave();
-      renderTabs();
     }
 
     function closeTab(index) {
-      if (tabs.length <= 1) {
-        toast('No puedes cerrar la última pestaña');
-        return;
-      }
+      if (tabs.length <= 1) { toast('No puedes cerrar la última pestaña'); return; }
       saveCurrentTabState();
       tabs.splice(index, 1);
-      if (currentTabIndex >= tabs.length) {
-        currentTabIndex = tabs.length - 1;
-      } else if (currentTabIndex > index) {
-        currentTabIndex--;
-      } else if (currentTabIndex === index) {
-        currentTabIndex = Math.min(index, tabs.length - 1);
-      }
-      nodeElements.forEach(el => el.remove());
-      nodeElements.clear();
-      selectedIds.clear();
+      if (currentTabIndex >= tabs.length) currentTabIndex = tabs.length - 1;
+      else if (currentTabIndex > index) currentTabIndex--;
+      else if (currentTabIndex === index) currentTabIndex = Math.min(index, tabs.length - 1);
       loadTabState(currentTabIndex);
-      applyLabelScale();
-      syncNodes();
+      resetCanvasView();
       scheduleSave();
-      renderTabs();
     }
 
     function renameTab(index, newName) {
@@ -454,34 +548,27 @@
     }
 
     function renderTabs() {
-      if (!tabList) {
-        console.error('No se encontró #tab-list');
-        return;
-      }
+      if (!tabList) return;
       tabList.innerHTML = '';
       tabs.forEach((tab, i) => {
         const tabEl = document.createElement('div');
         tabEl.className = 'tab' + (i === currentTabIndex ? ' active' : '');
-        tabEl.innerHTML = `<span class="tab-name">${tab.name}</span><span class="tab-close" data-index="${i}">×</span>`;
-        tabEl.addEventListener('click', (e) => {
-          if (e.target.classList.contains('tab-close')) {
-            e.stopPropagation();
-            closeTab(parseInt(e.target.dataset.index));
-          } else {
-            switchToTab(i);
-          }
-        });
-        tabEl.addEventListener('dblclick', (e) => {
+        // textContent evita inyectar HTML con nombres como "<b>" o "&"
+        const nameEl = document.createElement('span'); nameEl.className = 'tab-name'; nameEl.textContent = tab.name;
+        const closeEl = document.createElement('span'); closeEl.className = 'tab-close'; closeEl.textContent = '×';
+        tabEl.append(nameEl, closeEl);
+        closeEl.addEventListener('click', e => { e.stopPropagation(); closeTab(i); });
+        tabEl.addEventListener('click', () => switchToTab(i));
+        tabEl.addEventListener('dblclick', () => {
           const newName = prompt('Renombrar pestaña:', tab.name);
           if (newName !== null) renameTab(i, newName);
         });
         tabList.appendChild(tabEl);
       });
-      console.log('🟢 Pestañas renderizadas:', tabList.children.length);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // UTILIDADES (con estado global)
+    // UTILIDADES
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
     function pushUndo() {
@@ -504,49 +591,49 @@
       nodes = next.nodes; edges = next.edges; groups = next.groups; nextId = next.nextId; nextGroupId = next.nextGroupId;
       selectedIds.clear(); syncNodes(); scheduleSave(); toast('↪️ Rehacer');
     }
-    function scheduleSave() { clearTimeout(saveTimer); document.getElementById('save-status').textContent = '● Guardando...'; document.getElementById('save-status').style.color = 'var(--text-muted)'; saveTimer = setTimeout(saveState, 1200); }
+    function scheduleSave() { savePending = true; clearTimeout(saveTimer); const s = document.getElementById('save-status'); s.textContent = '● Guardando...'; s.style.color = 'var(--text-muted)'; saveTimer = setTimeout(saveState, 1200); }
+
+    // Serializa las pestañas SIN el historial de deshacer/rehacer (solo vive en memoria)
+    function serializeTabs() {
+      return tabs.map(tab => ({
+        name: tab.name, nodes: tab.nodes, edges: tab.edges, groups: tab.groups,
+        nextId: tab.nextId, nextGroupId: tab.nextGroupId,
+        transform: tab.transform, labelScale: tab.labelScale
+      }));
+    }
+    function normalizeTabs(list) {
+      return list.map(t => ({
+        name: String(t.name || 'Pizarra'),
+        nodes: t.nodes || [], edges: t.edges || [], groups: t.groups || [],
+        nextId: t.nextId || 1, nextGroupId: t.nextGroupId || 1,
+        transform: t.transform || { x: wrap.clientWidth/2, y: wrap.clientHeight/2, scale: 1 },
+        labelScale: t.labelScale || 1, undoStack: [], redoStack: []
+      }));
+    }
     function saveState() {
+      savePending = false;
+      const status = document.getElementById('save-status');
       try {
         saveCurrentTabState();
-        const state = { tabs: tabs.map(tab => ({
-            name: tab.name,
-            nodes: tab.nodes,
-            edges: tab.edges,
-            groups: tab.groups,
-            nextId: tab.nextId,
-            nextGroupId: tab.nextGroupId,
-            transform: tab.transform,
-            labelScale: tab.labelScale,
-            undoStack: tab.undoStack,
-            redoStack: tab.redoStack
-          })), currentTabIndex, infoCollapsed: infoPanel.classList.contains('collapsed'), hintCollapsed: hint.classList.contains('collapsed') };
+        const state = { tabs: serializeTabs(), currentTabIndex, infoCollapsed: infoPanel.classList.contains('collapsed'), hintCollapsed: hint.classList.contains('collapsed') };
         localStorage.setItem('mindflow_tabs', JSON.stringify(state));
-        document.getElementById('save-status').textContent = '✓ Guardado';
-        document.getElementById('save-status').style.color = '#4ade80';
-      } catch(e) {}
+        status.textContent = '✓ Guardado';
+        status.style.color = '#4ade80';
+        try { window.MindFlow && window.MindFlow.onLocalSave && window.MindFlow.onLocalSave(); } catch(_) {}
+      } catch(e) {
+        status.textContent = '⚠ Sin espacio';
+        status.style.color = '#f87171';
+        toast('⚠️ No se pudo guardar. Exporta un backup.');
+      }
     }
     function loadState() {
       try {
         const raw = localStorage.getItem('mindflow_tabs');
         if (!raw) return false;
         const s = JSON.parse(raw);
-        if (s.tabs && Array.isArray(s.tabs) && s.tabs.length > 0) {
-          tabs = s.tabs.map(t => ({
-            name: t.name,
-            nodes: t.nodes || [],
-            edges: t.edges || [],
-            groups: t.groups || [],
-            nextId: t.nextId || 1,
-            nextGroupId: t.nextGroupId || 1,
-            transform: t.transform || { x: wrap.clientWidth/2, y: wrap.clientHeight/2, scale: 1 },
-            labelScale: t.labelScale || 1,
-            undoStack: t.undoStack || [],
-            redoStack: t.redoStack || []
-          }));
-          currentTabIndex = s.currentTabIndex || 0;
-        } else {
-          return false;
-        }
+        if (!(s.tabs && Array.isArray(s.tabs) && s.tabs.length > 0)) return false;
+        tabs = normalizeTabs(s.tabs);
+        currentTabIndex = Math.min(s.currentTabIndex || 0, tabs.length - 1);
         if (s.infoCollapsed) infoPanel.classList.add('collapsed');
         if (s.hintCollapsed) hint.classList.add('collapsed');
         return true;
@@ -588,13 +675,18 @@
     function deleteSelected() {
       if (selectedIds.size === 0) return;
       pushUndo();
-      [...selectedIds].forEach(id => { if (nodes.find(n => n.type === 'root')?.id !== id) deleteNodeById(id); });
+      [...selectedIds].forEach(id => { if (nodes.find(n => n.type === 'root')?.id !== id && nodes.find(n => n.id === id)) deleteNodeById(id); });
       selectedIds.clear(); syncNodes(); scheduleSave();
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // RENDERIZADO DE NODOS
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function styleTextNode(node, el) {
+      if (node.type === 'root') { el.style.background = 'var(--surface-2)'; el.style.border = '2px solid rgba(128,128,128,0.35)'; el.style.color = 'var(--text)'; }
+      else if (isFreeText(node)) { el.classList.add('free-text'); el.style.background = 'var(--bg)'; el.style.border = ''; el.style.color = dc(node.color); }
+      else { el.style.background = fill(dc(node.color), fa()); el.style.border = `2px solid ${dc(node.color)}`; el.style.color = dc(node.color); }
+    }
     function createNodeEl(node) {
       if (nodeElements.has(node.id)) return nodeElements.get(node.id);
       const wrapEl = document.createElement('div');
@@ -604,24 +696,23 @@
       const el = document.createElement('div'); el.className = `node ${node.type}`;
 
       if (node.nodeKind === 'image') {
-        el.classList.add('image-node'); el.style.borderColor = node.color; el.style.border = `2px solid ${node.color}`; el.style.background = `${node.color}15`; el.style.color = node.color;
+        el.classList.add('image-node'); el.style.border = `2px solid ${dc(node.color)}`; el.style.background = fill(dc(node.color), fa()); el.style.color = dc(node.color);
         const img = document.createElement('img'); img.className = 'node-img'; img.src = node.imgSrc; img.alt = node.label||'imagen'; el.appendChild(img);
         if (node.label) { const lbl = document.createElement('div'); lbl.className = 'node-label'; lbl.textContent = node.label; el.appendChild(lbl); }
       } else if (node.nodeKind === 'link') {
-        el.classList.add('link-node'); el.style.borderColor = node.color; el.style.border = `2px solid ${node.color}`; el.style.background = `${node.color}15`; el.style.color = node.color;
+        el.classList.add('link-node'); el.style.border = `2px solid ${dc(node.color)}`; el.style.background = fill(dc(node.color), fa()); el.style.color = dc(node.color);
         const lbl = document.createElement('div'); lbl.className = 'node-label'; lbl.textContent = node.label||'🔗 Link'; el.appendChild(lbl);
         const urlEl = document.createElement('div'); urlEl.className = 'node-link-url'; urlEl.textContent = node.url;
         urlEl.addEventListener('click', e => { e.stopPropagation(); window.open(node.url, '_blank', 'noopener'); }); el.appendChild(urlEl);
       } else if (node.nodeKind === 'file') {
-        el.classList.add('file-node'); el.style.borderColor = node.color; el.style.border = `2px solid ${node.color}`; el.style.background = `${node.color}15`; el.style.color = node.color;
+        el.classList.add('file-node'); el.style.border = `2px solid ${dc(node.color)}`; el.style.background = fill(dc(node.color), fa()); el.style.color = dc(node.color);
         const icon = document.createElement('div'); icon.className = 'node-file-icon'; icon.textContent = node.fileIcon||'📎'; el.appendChild(icon);
         const lbl = document.createElement('div'); lbl.className = 'node-label'; lbl.textContent = node.label; el.appendChild(lbl);
       } else if (node.nodeKind === 'note') {
-        el.classList.add('note-node'); el.style.borderColor = node.color; el.style.background = `${node.color}08`; el.style.color = node.color;
+        el.classList.add('note-node'); el.style.borderColor = dc(node.color); el.style.background = fill(dc(node.color), '10'); el.style.color = dc(node.color);
         const lbl = document.createElement('div'); lbl.className = 'node-label'; lbl.textContent = node.label; el.appendChild(lbl);
       } else {
-        if (node.type === 'root') { el.style.background = 'var(--surface-2)'; el.style.border = '2px solid rgba(255,255,255,0.15)'; el.style.color = 'var(--text)'; }
-        else { el.style.background = `${node.color}18`; el.style.border = `2px solid ${node.color}`; el.style.color = node.color; }
+        styleTextNode(node, el);
         const lbl = document.createElement('div'); lbl.className = 'node-label'; lbl.textContent = node.label; el.appendChild(lbl);
       }
 
@@ -632,7 +723,7 @@
       delBtn.className = 'node-del-btn';
       delBtn.textContent = '×';
       delBtn.setAttribute('aria-label', 'Eliminar nodo');
-      delBtn.addEventListener('mousedown', e => { e.stopPropagation(); });
+      delBtn.addEventListener('pointerdown', e => { e.stopPropagation(); });
       delBtn.addEventListener('click', e => {
         e.stopPropagation();
         if (node.type === 'root') return;
@@ -650,36 +741,91 @@
 
       el.addEventListener('dblclick', e => { e.stopPropagation(); startEdit(node.id, el); });
       wrapEl.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); showCtxMenu(e, node.id); });
-      wrapEl.addEventListener('mousedown', e => {
+      wrapEl.addEventListener('pointerdown', e => {
         if (e.target === addBtn || e.target === delBtn) return;
+        if (e.target.tagName === 'TEXTAREA') { e.stopPropagation(); return; } // permite seleccionar texto mientras se edita
         e.stopPropagation();
-        if (!e.ctrlKey && !e.metaKey) { if (!selectedIds.has(node.id)) selectedIds.clear(); selectedIds.add(node.id); }
+        if (touches.size > 1) return; // pellizco en curso
+        const multi = e.ctrlKey || e.metaKey || selectMode;
+        if (!multi) { if (!selectedIds.has(node.id)) selectedIds.clear(); selectedIds.add(node.id); }
         else { if (selectedIds.has(node.id)) selectedIds.delete(node.id); else selectedIds.add(node.id); }
+        updateFmtBar();
         startNodeDrag(e, node.id);
+        if (e.pointerType !== 'mouse') {   // pulsación larga = menú contextual
+          clearTimeout(longPressTimer);
+          const cx = e.clientX, cy = e.clientY;
+          longPressTimer = setTimeout(() => {
+            if (!nodeDragged && dragging === node.id) { cancelNodeDrag(); showCtxMenu({ clientX: cx, clientY: cy }, node.id); }
+          }, 550);
+        }
       });
+      // doble toque / doble clic para editar
+      wrapEl.addEventListener('click', e => {
+        if (e.target === addBtn || e.target === delBtn || e.target.tagName === 'TEXTAREA' || e.target.classList.contains('node-link-url')) return;
+        if (nodeDragged) return;
+        const now = Date.now();
+        if (lastTap.id === node.id && now - lastTap.t < 400) { lastTap = { id: null, t: 0 }; startEdit(node.id, el); }
+        else lastTap = { id: node.id, t: now };
+      });
+      applyFormat(node, el);
       nodeElements.set(node.id, wrapEl);
       return wrapEl;
     }
     function getNodeEl(id) { return nodeElements.get(id) || document.getElementById(`node-${id}`); }
+
     function startEdit(id, nodeEl) {
       const node = nodes.find(n => n.id === id); if (!node) return;
       const lbl = nodeEl.querySelector('.node-label'); if (!lbl) return;
-      const input = document.createElement('textarea'); input.className = 'node-edit-input'; input.value = node.label;
-      input.rows = Math.max(1, node.label.split('\n').length); input.style.color = nodeEl.style.color || 'var(--text)'; lbl.style.display = 'none'; nodeEl.appendChild(input); input.focus(); input.select();
-      function finish() { node.label = input.value.trim() || node.label; lbl.textContent = node.label; lbl.style.display = ''; input.remove(); updateNodeVisuals(node); scheduleSave(); pushUndo(); }
+      if (nodeEl.querySelector('.node-edit-input')) return;
+      const free = isFreeText(node);
+      const original = node.label;
+      const input = document.createElement('textarea');
+      input.className = 'node-edit-input'; input.value = node.label; input.spellcheck = false;
+      input.style.color = nodeEl.style.color || 'var(--text)';
+      lbl.style.display = 'none'; nodeEl.appendChild(input);
+      editingId = id; applyFormat(node, nodeEl); selectedIds = new Set([id]); updateAllSelectedClass();
+
+      function resize() {
+        const lines = input.value.split('\n');
+        input.rows = Math.max(1, lines.length);
+        if (free) input.style.width = (Math.max(3, ...lines.map(l => l.length)) + 1) + 'ch';
+        positionNode(node); drawEdges(); drawGroups();
+      }
+      resize(); input.focus(); input.select();
+
+      let done = false;
+      function finish() {
+        if (done) return; done = true; editingId = null;
+        const value = input.value.trim();
+        input.remove(); lbl.style.display = '';
+        if (free && !value) {                       // texto libre vacío = se descarta (como en Figma)
+          deleteNodeById(id); syncNodes(); scheduleSave(); return;
+        }
+        if (value && value !== original) { pushUndo(); node.label = free ? input.value.replace(/\s+$/,'') : value; }
+        lbl.textContent = node.label;
+        updateNodeVisuals(node); positionNode(node); drawEdges(); drawGroups(); updateFmtBar(); scheduleSave();
+      }
+      input.addEventListener('input', resize);
       input.addEventListener('blur', finish);
-      input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); finish(); } });
+      input.addEventListener('keydown', e => {
+        e.stopPropagation();
+        if ((e.ctrlKey||e.metaKey) && (e.key==='b'||e.key==='B')) { e.preventDefault(); toggleFmt('bold'); return; }
+        if ((e.ctrlKey||e.metaKey) && (e.key==='i'||e.key==='I')) { e.preventDefault(); toggleFmt('italic'); return; }
+        if (e.key === 'Escape') { e.preventDefault(); finish(); }
+        else if (e.key === 'Enter') {
+          if (free) { if (e.ctrlKey || e.metaKey) { e.preventDefault(); finish(); } }   // Enter = salto de línea
+          else if (!e.shiftKey) { e.preventDefault(); finish(); }
+        }
+      });
     }
     function updateNodeVisuals(node) {
       const wrapEl = nodeElements.get(node.id); if (!wrapEl) return;
       const el = wrapEl.querySelector('.node');
-      if (!node.nodeKind || node.nodeKind === 'text') { const lbl = el.querySelector('.node-label'); if (lbl) lbl.textContent = node.label; }
-      else if (node.nodeKind === 'note') { const lbl = el.querySelector('.node-label'); if (lbl) lbl.textContent = node.label; }
+      applyFormat(node, el);
+      if (!node.nodeKind || node.nodeKind === 'text' || node.nodeKind === 'note') { const lbl = el.querySelector('.node-label'); if (lbl) lbl.textContent = node.label; }
       else if (node.nodeKind === 'link') { const lbl = el.querySelector('.node-label'); if (lbl) lbl.textContent = node.label || '🔗 Link'; }
-      if (!node.nodeKind || node.nodeKind === 'text' || node.nodeKind === 'note') {
-        if (node.type === 'root') { el.style.background = 'var(--surface-2)'; el.style.border = '2px solid rgba(255,255,255,0.15)'; el.style.color = 'var(--text)'; }
-        else { el.style.background = `${node.color}18`; el.style.border = `2px solid ${node.color}`; el.style.color = node.color; }
-      }
+      if (!node.nodeKind || node.nodeKind === 'text') styleTextNode(node, el);
+      else if (node.nodeKind === 'note') { el.style.borderColor = dc(node.color); el.style.background = fill(dc(node.color), '10'); el.style.color = dc(node.color); }
     }
 
     let nodeContainer = null;
@@ -689,7 +835,7 @@
       const currentIds = new Set(nodes.map(n => n.id));
       for (const [id, el] of nodeElements.entries()) { if (!currentIds.has(id)) { el.remove(); nodeElements.delete(id); } }
       nodes.forEach(node => { if (!nodeElements.has(node.id)) { nodeContainer.appendChild(createNodeEl(node)); } });
-      applyLabelScale(); updatePositions(); drawEdges(); drawGroups(); updateCount();
+      applyLabelScale(); updatePositions(); drawEdges(); drawGroups(); updateCount(); updateFmtBar();
     }
     function applyLabelScale() { document.documentElement.style.setProperty('--label-scale', labelScale); }
     function positionNode(node) {
@@ -707,21 +853,16 @@
         if (!from||!to) return;
         const fx = transform.x+from.x*transform.scale, fy = transform.y+from.y*transform.scale;
         const tx = transform.x+to.x*transform.scale, ty = transform.y+to.y*transform.scale;
-        const grad = ctx2d.createLinearGradient(fx,fy,tx,ty); grad.addColorStop(0,to.color+'33'); grad.addColorStop(1,to.color+'99');
+        const grad = ctx2d.createLinearGradient(fx,fy,tx,ty); grad.addColorStop(0,dc(to.color)+'55'); grad.addColorStop(1,dc(to.color)+'cc');
         ctx2d.beginPath(); ctx2d.strokeStyle=grad; ctx2d.lineWidth=to.type==='grandchild'?1.5:2.5; ctx2d.lineCap='round';
         ctx2d.moveTo(fx,fy); ctx2d.bezierCurveTo((fx+tx)/2,fy,(fx+tx)/2,ty,tx,ty); ctx2d.stroke();
       });
     }
     function drawGroups() {
-
       nodes.forEach(n => {
-          const el = getNodeEl(n.id);
-          if (el) {
-            el.classList.remove('group-member');
-            el.style.removeProperty('--group-color'); // limpiar variable CSS
-          }
-        });
-      
+        const el = getNodeEl(n.id);
+        if (el) { el.classList.remove('group-member'); el.style.removeProperty('--group-color'); }
+      });
       wrap.querySelectorAll('.group-el, .group-label-el').forEach(el=>el.remove());
       groups.forEach(g => {
         if (g.members.length<2) return;
@@ -737,19 +878,16 @@
         const pad=20;
         const box=document.createElement('div'); box.className='group-el';
         box.style.left=`${minX-pad}px`; box.style.top=`${minY-pad}px`; box.style.width=`${maxX-minX+pad*2}px`; box.style.height=`${maxY-minY+pad*2}px`;
-        box.style.borderColor=g.color+'66'; box.style.background=g.color+'08'; wrap.appendChild(box);
+        box.style.borderColor=dc(g.color)+'99'; box.style.background=dc(g.color)+'12'; wrap.appendChild(box);
         const lbl=document.createElement('div'); lbl.className='group-label-el'; lbl.textContent=g.name;
-        lbl.style.left=`${minX-pad+10}px`; lbl.style.top=`${minY-pad-20}px`; lbl.style.color=g.color; lbl.style.background=g.color+'22';
-        lbl.addEventListener('mousedown', e => {
+        lbl.style.left=`${minX-pad+10}px`; lbl.style.top=`${minY-pad-20}px`; lbl.style.color=dc(g.color); lbl.style.background=dc(g.color)+'28';
+        lbl.addEventListener('pointerdown', e => {
           e.stopPropagation(); const startX=e.clientX,startY=e.clientY; let moved=false;
           function onMouseMove(ev){ if(!moved&&Math.hypot(ev.clientX-startX,ev.clientY-startY)>3){ moved=true; startGroupDrag(g.id,startX,startY); } if(moved) onGroupDragMove(ev); }
-          function onMouseUp(){ document.removeEventListener('mousemove',onMouseMove); document.removeEventListener('mouseup',onMouseUp); if(!moved) editGroup(g); else stopGroupDrag(); }
-          document.addEventListener('mousemove',onMouseMove); document.addEventListener('mouseup',onMouseUp);
+          function onMouseUp(){ document.removeEventListener('pointermove',onMouseMove); document.removeEventListener('pointerup',onMouseUp); document.removeEventListener('pointercancel',onMouseUp); if(!moved) editGroup(g); else stopGroupDrag(); }
+          document.addEventListener('pointermove',onMouseMove); document.addEventListener('pointerup',onMouseUp); document.addEventListener('pointercancel',onMouseUp);
         });
-        lbl.addEventListener('contextmenu', e => {
-          e.preventDefault(); e.stopPropagation();
-          showGroupColorPopup(e.clientX, e.clientY, g.id);
-        });
+        lbl.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); showGroupColorPopup(e.clientX, e.clientY, g.id); });
         wrap.appendChild(lbl);
       });
       groups.forEach(g=>g.members.forEach(id=>{ const el=getNodeEl(id); if(el) el.classList.add('group-member'); }));
@@ -773,43 +911,93 @@
     function stopGroupDrag(){ if(dragging&&groupDragId) scheduleSave(); dragging=null; groupDragId=null; groupStartPositions=[]; }
 
     function startNodeDrag(e,id){
-      dragging=id; const node=nodes.find(n=>n.id===id);
+      dragging=id; nodeDragged=false; dragStartClient={x:e.clientX,y:e.clientY}; dragPointerId=e.pointerId;
+      const node=nodes.find(n=>n.id===id);
       const rect=wrap.getBoundingClientRect(); const sx=e.clientX-rect.left, sy=e.clientY-rect.top;
       draggingOffset={x:sx-(transform.x+node.x*transform.scale), y:sy-(transform.y+node.y*transform.scale)};
       dragMultiStart={}; selectedIds.forEach(sid=>{const sn=nodes.find(n=>n.id===sid);if(sn)dragMultiStart[sid]={x:sn.x,y:sn.y};});
       if(!dragMultiStart[id]) dragMultiStart[id]={x:node.x,y:node.y};
-      document.addEventListener('mousemove',onNodeMove); document.addEventListener('mouseup',stopNodeDrag); e.preventDefault();
+      document.addEventListener('pointermove',onNodeMove); document.addEventListener('pointerup',stopNodeDrag); document.addEventListener('pointercancel',stopNodeDrag); e.preventDefault();
     }
     function onNodeMove(e){
-      if(!dragging||typeof dragging!=='number')return;
+      if(!dragging||typeof dragging!=='number'||e.pointerId!==dragPointerId)return;
+      if(!nodeDragged){   // umbral de 6px: distingue toque de arrastre
+        if(Math.hypot(e.clientX-dragStartClient.x,e.clientY-dragStartClient.y)<6) return;
+        nodeDragged=true; clearTimeout(longPressTimer); pushUndo();
+      }
       const rect=wrap.getBoundingClientRect(); const sx=e.clientX-rect.left, sy=e.clientY-rect.top;
-      const node=nodes.find(n=>n.id===dragging); const newX=(sx-draggingOffset.x-transform.x)/transform.scale, newY=(sy-draggingOffset.y-transform.y)/transform.scale;
+      const node=nodes.find(n=>n.id===dragging); if(!node) return;
+      const newX=(sx-draggingOffset.x-transform.x)/transform.scale, newY=(sy-draggingOffset.y-transform.y)/transform.scale;
       const dx=newX-(dragMultiStart[dragging]?.x||node.x), dy=newY-(dragMultiStart[dragging]?.y||node.y);
       if(selectedIds.size>1){ selectedIds.forEach(sid=>{const sn=nodes.find(n=>n.id===sid);if(sn&&dragMultiStart[sid]){sn.x=dragMultiStart[sid].x+dx;sn.y=dragMultiStart[sid].y+dy;}}); }
       else{ node.x=newX; node.y=newY; }
       updatePositions();
     }
-    function stopNodeDrag(){ if(dragging&&typeof dragging==='number') pushUndo(); dragging=null; document.removeEventListener('mousemove',onNodeMove); document.removeEventListener('mouseup',stopNodeDrag); scheduleSave(); }
+    function removeNodeDragListeners(){ document.removeEventListener('pointermove',onNodeMove); document.removeEventListener('pointerup',stopNodeDrag); document.removeEventListener('pointercancel',stopNodeDrag); }
+    function stopNodeDrag(e){
+      if(e&&e.pointerId!==undefined&&e.pointerId!==dragPointerId) return;
+      clearTimeout(longPressTimer); const was=nodeDragged; dragging=null; removeNodeDragListeners(); if(was) scheduleSave();
+    }
+    function cancelNodeDrag(){ clearTimeout(longPressTimer); dragging=null; nodeDragged=true; removeNodeDragListeners(); }
 
     // Pan y zoom
-    wrap.addEventListener('mousedown', e => {
-      if (e.target.closest('.node-wrap')||e.target.closest('.group-label-el')||e.target.closest('#info-panel')||e.target.closest('#hint')) return;
-      if (e.ctrlKey||e.metaKey) {
+    wrap.addEventListener('pointerdown', e => {
+      if (e.target.closest('.node-wrap')||e.target.closest('.group-label-el')||e.target.closest('#info-panel')||e.target.closest('#hint')||e.target.closest('#fmt-bar')) return;
+      if (e.pointerType==='mouse' && e.button!==0) return;
+      if (touches.size > 1) return;   // pellizco en curso
+      panMoved = false;
+      const multi = e.ctrlKey||e.metaKey||selectMode;
+      if (!multi && selectedIds.size) { selectedIds.clear(); updateAllSelectedClass(); }
+      if (multi) {
         const rect=wrap.getBoundingClientRect(); selBoxActive=true; selStart={x:e.clientX-rect.left,y:e.clientY-rect.top}; selEnd={...selStart};
-        wrap.classList.add('selecting'); document.addEventListener('mousemove',onSelMove); document.addEventListener('mouseup',stopSel); return;
+        wrap.classList.add('selecting'); document.addEventListener('pointermove',onSelMove); document.addEventListener('pointerup',stopSel); document.addEventListener('pointercancel',stopSel); return;
       }
-      panning=true; panStart={x:e.clientX,y:e.clientY}; panOrigin={x:transform.x,y:transform.y}; wrap.classList.add('panning');
+      panning=true; panPointerId=e.pointerId; panStart={x:e.clientX,y:e.clientY}; panOrigin={x:transform.x,y:transform.y}; wrap.classList.add('panning');
     });
-    document.addEventListener('mousemove', e => { if(panning){ transform.x=panOrigin.x+(e.clientX-panStart.x); transform.y=panOrigin.y+(e.clientY-panStart.y); updatePositions(); scheduleSave(); } });
-    document.addEventListener('mouseup', ()=>{ panning=false; wrap.classList.remove('panning'); });
+    document.addEventListener('pointermove', e => {
+      if(panning && e.pointerId===panPointerId){
+        if(!panMoved && Math.hypot(e.clientX-panStart.x,e.clientY-panStart.y)>5) panMoved=true;
+        transform.x=panOrigin.x+(e.clientX-panStart.x); transform.y=panOrigin.y+(e.clientY-panStart.y); updatePositions(); scheduleSave();
+      }
+    });
+    const endPan = e => { if(e.pointerId===panPointerId){ panning=false; wrap.classList.remove('panning'); } };
+    document.addEventListener('pointerup', endPan); document.addEventListener('pointercancel', endPan);
+
+    // Pellizco con dos dedos: zoom + desplazamiento
+    wrap.addEventListener('pointerdown', e => {
+      if (e.pointerType!=='touch') return;
+      if (e.target.closest('#fmt-bar')||e.target.closest('#info-panel')||e.target.closest('#hint')) return;
+      touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if (touches.size===2) startPinch();
+    }, true);
+    function pinchGeom(){ const [a,b]=[...touches.values()]; return { dist: Math.hypot(a.x-b.x,a.y-b.y)||1, mx:(a.x+b.x)/2, my:(a.y+b.y)/2 }; }
+    function startPinch(){
+      cancelNodeDrag(); panning=false; wrap.classList.remove('panning'); if(selBoxActive) stopSel();
+      const g=pinchGeom(), rect=wrap.getBoundingClientRect();
+      pinch={ dist:g.dist, scale:transform.scale, wx:(g.mx-rect.left-transform.x)/transform.scale, wy:(g.my-rect.top-transform.y)/transform.scale };
+      panMoved=true;
+    }
+    document.addEventListener('pointermove', e => {
+      if(!touches.has(e.pointerId)) return;
+      touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(pinch && touches.size>=2){
+        const g=pinchGeom(), rect=wrap.getBoundingClientRect();
+        const ns=Math.min(3,Math.max(0.2,pinch.scale*g.dist/pinch.dist));
+        transform.scale=ns; transform.x=(g.mx-rect.left)-pinch.wx*ns; transform.y=(g.my-rect.top)-pinch.wy*ns;
+        updatePositions(); document.getElementById('zoom-reset').textContent=Math.round(ns*100)+'%'; scheduleSave();
+      }
+    });
+    const endTouch = e => { if(touches.delete(e.pointerId) && touches.size<2) pinch=null; };
+    document.addEventListener('pointerup', endTouch); document.addEventListener('pointercancel', endTouch);
     function onSelMove(e){
-      if(!selBoxActive)return; const rect=wrap.getBoundingClientRect(); selEnd={x:e.clientX-rect.left,y:e.clientY-rect.top};
+      if(!selBoxActive)return; panMoved=true; const rect=wrap.getBoundingClientRect(); selEnd={x:e.clientX-rect.left,y:e.clientY-rect.top};
       const sb=document.getElementById('sel-box'); const x=Math.min(selStart.x,selEnd.x),y=Math.min(selStart.y,selEnd.y),w=Math.abs(selEnd.x-selStart.x),h=Math.abs(selEnd.y-selStart.y);
       sb.style.display='block'; sb.style.left=x+'px'; sb.style.top=y+'px'; sb.style.width=w+'px'; sb.style.height=h+'px';
       selectedIds.clear(); nodes.forEach(n=>{const nx=transform.x+n.x*transform.scale,ny=transform.y+n.y*transform.scale;if(nx>=x&&nx<=x+w&&ny>=y&&ny<=y+h)selectedIds.add(n.id);});
       nodes.forEach(n=>{const el=getNodeEl(n.id);if(el)el.classList.toggle('selected',selectedIds.has(n.id));});
+      updateFmtBar();
     }
-    function stopSel(){ selBoxActive=false; document.getElementById('sel-box').style.display='none'; wrap.classList.remove('selecting'); document.removeEventListener('mousemove',onSelMove); document.removeEventListener('mouseup',stopSel); }
+    function stopSel(){ selBoxActive=false; document.getElementById('sel-box').style.display='none'; wrap.classList.remove('selecting'); document.removeEventListener('pointermove',onSelMove); document.removeEventListener('pointerup',stopSel); document.removeEventListener('pointercancel',stopSel); }
 
     wrap.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX-wrap.getBoundingClientRect().left, e.clientY-wrap.getBoundingClientRect().top, e.deltaY>0?0.9:1.1); }, {passive:false});
     function zoomAt(cx,cy,factor){ const ns=Math.min(3,Math.max(0.2,transform.scale*factor)); const ratio=ns/transform.scale; transform.x=cx-ratio*(cx-transform.x); transform.y=cy-ratio*(cy-transform.y); transform.scale=ns; updatePositions(); document.getElementById('zoom-reset').textContent=Math.round(transform.scale*100)+'%'; }
@@ -820,7 +1008,9 @@
     // Atajos
     document.addEventListener('keydown', e => {
       if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'){if(e.key==='Enter'&&e.target.id==='search-input'){e.preventDefault();jumpToSearchResult();}return;}
-      if(e.key==='t'||e.key==='T'){e.preventDefault(); quickAddNode();}
+      if(e.key==='t'||e.key==='T'){e.preventDefault(); createTextAt(lastMousePos.x, lastMousePos.y);}
+      else if((e.ctrlKey||e.metaKey)&&(e.key==='b'||e.key==='B')){e.preventDefault();toggleFmt('bold');}
+      else if((e.ctrlKey||e.metaKey)&&(e.key==='i'||e.key==='I')){e.preventDefault();toggleFmt('italic');}
       else if((e.ctrlKey||e.metaKey)&&e.key==='g'){e.preventDefault(); openGroupModal();}
       else if((e.ctrlKey||e.metaKey)&&e.key==='a'){e.preventDefault();selectedIds=new Set(nodes.map(n=>n.id));updateAllSelectedClass();}
       else if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo();}
@@ -828,18 +1018,34 @@
       else if((e.key==='Delete'||e.key==='Backspace')&&selectedIds.size>0){e.preventDefault();deleteSelected();}
       else if(e.key==='Escape'){selectedIds.clear();updateAllSelectedClass();closeCtxMenu();closeColorPopup();}
     });
-    wrap.addEventListener('mousemove', e => { const rect=wrap.getBoundingClientRect(); lastMousePos={x:(e.clientX-rect.left-transform.x)/transform.scale, y:(e.clientY-rect.top-transform.y)/transform.scale}; });
-    function updateAllSelectedClass(){ nodes.forEach(n=>{ const el=getNodeEl(n.id); if(el) el.classList.toggle('selected',selectedIds.has(n.id)); }); }
+    wrap.addEventListener('pointermove', e => { const rect=wrap.getBoundingClientRect(); lastMousePos={x:(e.clientX-rect.left-transform.x)/transform.scale, y:(e.clientY-rect.top-transform.y)/transform.scale}; });
+    function updateAllSelectedClass(){ nodes.forEach(n=>{ const el=getNodeEl(n.id); if(el) el.classList.toggle('selected',selectedIds.has(n.id)); }); updateFmtBar(); }
     function jumpToSearchResult(){ const q=document.getElementById('search-input').value.toLowerCase().trim(); if(!q)return; const match=nodes.find(n=>n.label.toLowerCase().includes(q)); if(match){ transform.x=wrap.clientWidth/2-match.x*transform.scale; transform.y=wrap.clientHeight/2-match.y*transform.scale; updatePositions(); scheduleSave(); } }
 
-    function quickAddNode() {
+    // Texto libre (tecla T o doble clic en el vacío): aparece el cursor al instante, sin caja
+    function createTextAt(wx, wy) {
       const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-      const id = addFreeNode(lastMousePos.x, lastMousePos.y, 'Nueva idea', color, { nodeKind: 'text' });
+      const id = addFreeNode(wx, wy, '', color, { nodeKind: 'text' });
       syncNodes();
       const nodeEl = getNodeEl(id)?.querySelector('.node');
       if (nodeEl) startEdit(id, nodeEl);
       scheduleSave();
     }
+    wrap.addEventListener('click', e => {
+      if (e.target.closest('.node-wrap')||e.target.closest('.group-label-el')||e.target.closest('#info-panel')||e.target.closest('#hint')||e.target.closest('#fmt-bar')) return;
+      if (panMoved || e.ctrlKey || e.metaKey || selectMode) return;
+      const now = Date.now();
+      if (now - lastEmptyTap.t < 400 && Math.hypot(e.clientX - lastEmptyTap.x, e.clientY - lastEmptyTap.y) < 30) {
+        lastEmptyTap = { t: 0, x: 0, y: 0 };
+        const rect = wrap.getBoundingClientRect();
+        createTextAt((e.clientX-rect.left-transform.x)/transform.scale, (e.clientY-rect.top-transform.y)/transform.scale);
+      } else lastEmptyTap = { t: now, x: e.clientX, y: e.clientY };
+    });
+    document.getElementById('btn-text').addEventListener('click', () => createTextAt((wrap.clientWidth/2-transform.x)/transform.scale, (wrap.clientHeight/2-transform.y)/transform.scale));
+    document.getElementById('btn-select').addEventListener('click', function() {
+      selectMode = !selectMode; this.classList.toggle('active', selectMode);
+      toast(selectMode ? 'Modo selección: arrastra para seleccionar, toca nodos para sumar' : 'Modo selección desactivado');
+    });
 
     function quickAddChildNode(parentId) {
       const parent = nodes.find(n => n.id === parentId);
@@ -848,9 +1054,7 @@
       const type = parent.type === 'root' ? 'child' : 'grandchild';
       const angle = Math.random() * 2 * Math.PI;
       const dist = type === 'child' ? 280 : 160;
-      const rx = Math.cos(angle) * dist;
-      const ry = Math.sin(angle) * dist;
-      const id = addNode(parentId, 'Nueva idea', rx, ry, type, color, { nodeKind: 'text' });
+      const id = addNode(parentId, 'Nueva idea', Math.cos(angle) * dist, Math.sin(angle) * dist, type, color, { nodeKind: 'text' });
       syncNodes();
       const nodeEl = getNodeEl(id)?.querySelector('.node');
       if (nodeEl) startEdit(id, nodeEl);
@@ -863,12 +1067,11 @@
       const items=Array.from(e.clipboardData.items); const imgItem=items.find(i=>i.type.startsWith('image/'));
       if(imgItem){ pushUndo(); const file=imgItem.getAsFile(); const reader=new FileReader(); reader.onload=ev=>{ addFreeNode(lastMousePos.x,lastMousePos.y,'','#22d3ee',{nodeKind:'image',imgSrc:ev.target.result}); syncNodes(); scheduleSave(); toast('🖼️ Imagen pegada'); }; reader.readAsDataURL(file); return; }
       const textItem=items.find(i=>i.type==='text/plain');
-      if(textItem){ textItem.getAsString(text=>{ text=text.trim(); if(!text)return; pushUndo(); if(/^https?:\/\//i.test(text)){ addFreeNode(lastMousePos.x,lastMousePos.y,text.length>40?text.slice(0,40)+'…':text,'#22d3ee',{nodeKind:'link',url:text}); } else { const c=COLORS[Math.floor(Math.random()*COLORS.length)]; addFreeNode(lastMousePos.x,lastMousePos.y,text.slice(0,120),c); } syncNodes(); scheduleSave(); toast('📝 Pegado'); }); return; }
+      if(textItem){ textItem.getAsString(text=>{ text=text.trim(); if(!text)return; pushUndo(); if(/^https?:\/\//i.test(text)){ addFreeNode(lastMousePos.x,lastMousePos.y,text.length>40?text.slice(0,40)+'…':text,'#22d3ee',{nodeKind:'link',url:text}); } else { const c=COLORS[Math.floor(Math.random()*COLORS.length)]; addFreeNode(lastMousePos.x,lastMousePos.y,text.slice(0,500),c,{nodeKind:'text'}); } syncNodes(); scheduleSave(); toast('📝 Pegado'); }); return; }
       toast('⚠️ No se pudo pegar');
     });
 
     // Modal
-    function openFreeNodeModal(wx,wy){ freeNodePos={x:wx,y:wy}; pendingParentId=null; selectedColor=COLORS[Math.floor(Math.random()*COLORS.length)]; document.getElementById('modal-title').textContent='✦ Nuevo nodo libre'; document.getElementById('modal-input').value=''; document.getElementById('link-url-input').value=''; document.getElementById('node-type-select').value='text'; document.getElementById('link-url-input').style.display='none'; buildColorPicker(); document.getElementById('modal-overlay').classList.add('open'); setTimeout(()=>document.getElementById('modal-input').focus(),50); }
     function openModal(pid){ freeNodePos=null; pendingParentId=pid; const p=nodes.find(n=>n.id===pid); selectedColor=p?p.color:COLORS[Math.floor(Math.random()*COLORS.length)]; document.getElementById('modal-title').textContent=pid?`+ Sub-tarea de "${p?.label}"`:'Nuevo tema'; document.getElementById('modal-input').value=''; document.getElementById('link-url-input').value=''; document.getElementById('node-type-select').value='text'; document.getElementById('link-url-input').style.display='none'; buildColorPicker(); document.getElementById('modal-overlay').classList.add('open'); setTimeout(()=>document.getElementById('modal-input').focus(),50); }
     document.getElementById('node-type-select').addEventListener('change',function(){ const t=this.value; document.getElementById('link-url-input').style.display=t==='link'?'block':'none'; document.getElementById('modal-input').placeholder=t==='link'?'Nombre del enlace...':(t==='note'?'Escribe tu nota...':'¿Qué tienes que hacer?'); });
     function buildColorPicker(){ const picker=document.getElementById('color-picker'); picker.innerHTML=''; COLORS.forEach(c=>{ const dot=document.createElement('div'); dot.className='color-dot'+(c===selectedColor?' active':''); dot.style.background=c; dot.addEventListener('click',()=>{selectedColor=c;picker.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));dot.classList.add('active');}); picker.appendChild(dot); }); }
@@ -898,15 +1101,16 @@
     function closeGroupModal(){ document.getElementById('group-modal-overlay').style.display='none'; }
     document.getElementById('group-cancel').addEventListener('click',closeGroupModal);
     document.getElementById('group-modal-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('group-modal-overlay'))closeGroupModal();});
+    document.getElementById('group-name-input').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('group-confirm').click(); if(e.key==='Escape') closeGroupModal(); });
     document.getElementById('group-confirm').addEventListener('click',()=>{ const name=document.getElementById('group-name-input').value.trim()||'Grupo'; pushUndo(); const gid=nextGroupId++; groups.push({id:gid,name,color:selectedGroupColor,members:[...selectedIds]}); syncNodes(); closeGroupModal(); scheduleSave(); toast(`✦ Grupo "${name}" creado`); });
 
     // Menú contextual
-    function showCtxMenu(e,nodeId){ ctxNodeId=nodeId; const menu=document.getElementById('ctx-menu'); const node=nodes.find(n=>n.id===nodeId); document.getElementById('ctx-link').style.display=node?.nodeKind==='link'?'flex':'none'; menu.style.left=`${Math.min(e.clientX,window.innerWidth-200)}px`; menu.style.top=`${Math.min(e.clientY,window.innerHeight-200)}px`; menu.classList.add('open'); closeColorPopup(); }
+    function showCtxMenu(e,nodeId){ ctxOpenedAt=Date.now(); ctxNodeId=nodeId; const menu=document.getElementById('ctx-menu'); const node=nodes.find(n=>n.id===nodeId); document.getElementById('ctx-link').style.display=node?.nodeKind==='link'?'flex':'none'; menu.style.left=`${Math.min(e.clientX,window.innerWidth-200)}px`; menu.style.top=`${Math.min(e.clientY,window.innerHeight-200)}px`; menu.classList.add('open'); closeColorPopup(); }
     function closeCtxMenu(){ document.getElementById('ctx-menu').classList.remove('open'); ctxNodeId=null; }
-    document.addEventListener('click',e=>{if(!e.target.closest('#ctx-menu')&&!e.target.closest('#color-popup'))closeCtxMenu();});
+    document.addEventListener('click',e=>{if(Date.now()-ctxOpenedAt<600)return;if(!e.target.closest('#ctx-menu')&&!e.target.closest('#color-popup'))closeCtxMenu();});
     document.getElementById('ctx-edit').addEventListener('click',e=>{if(!ctxNodeId)return;e.stopPropagation();const el=getNodeEl(ctxNodeId)?.querySelector('.node');if(el)startEdit(ctxNodeId,el);closeCtxMenu();});
     document.getElementById('ctx-add-child').addEventListener('click',e=>{if(!ctxNodeId)return;e.stopPropagation();openModal(ctxNodeId);closeCtxMenu();});
-    document.getElementById('ctx-color').addEventListener('click',e=>{if(!ctxNodeId)return;e.stopPropagation();showNodeColorPopup(e.clientX,e.clientY,ctxNodeId);closeCtxMenu();});
+    document.getElementById('ctx-color').addEventListener('click',e=>{if(!ctxNodeId)return;e.stopPropagation();const nid=ctxNodeId;closeCtxMenu();showNodeColorPopup(e.clientX,e.clientY,nid);});
     document.getElementById('ctx-link').addEventListener('click',e=>{if(!ctxNodeId)return;e.stopPropagation();const n=nodes.find(n=>n.id===ctxNodeId);if(n?.url)window.open(n.url,'_blank','noopener');closeCtxMenu();});
     document.getElementById('ctx-del').addEventListener('click',e=>{if(!ctxNodeId)return;e.stopPropagation();const n=nodes.find(n=>n.id===ctxNodeId);if(n?.type==='root'){toast('No puedes eliminar el nodo raíz');closeCtxMenu();return;}if(confirm(`¿Eliminar "${n?.label}"?`)){deleteNodeById(ctxNodeId);syncNodes();scheduleSave();}closeCtxMenu();});
 
@@ -920,7 +1124,7 @@
           if (colorPopupTarget) {
             if (colorPopupTarget.type === 'node') {
               const node = nodes.find(n => n.id === colorPopupTarget.id);
-              if (node) { pushUndo(); node.color = c; updateNodeVisuals(node); scheduleSave(); }
+              if (node) { pushUndo(); node.color = c; updateNodeVisuals(node); drawEdges(); scheduleSave(); }
             } else if (colorPopupTarget.type === 'group') {
               const group = groups.find(g => g.id === colorPopupTarget.id);
               if (group) { pushUndo(); group.color = c; drawGroups(); scheduleSave(); toast('🎨 Color del grupo cambiado'); }
@@ -940,7 +1144,7 @@
     document.getElementById('search-input').addEventListener('input',e=>{ const q=e.target.value.toLowerCase().trim(); nodes.forEach(n=>{ const el=getNodeEl(n.id); if(el) el.classList.toggle('dimmed',q&&!n.label.toLowerCase().includes(q)); }); });
 
     const themeToggle=document.getElementById('theme-toggle');
-    themeToggle.addEventListener('click',()=>{ currentTheme=currentTheme==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',currentTheme); themeToggle.innerHTML=currentTheme==='dark'?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'; drawEdges(); });
+    themeToggle.addEventListener('click',()=>{ currentTheme=currentTheme==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',currentTheme); themeToggle.innerHTML=currentTheme==='dark'?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'; nodeElements.forEach(el => el.remove()); nodeElements.clear(); syncNodes(); });
 
     let toastTimer;
     function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2500); }
@@ -980,23 +1184,12 @@
     hintToggle.addEventListener('click', (e) => { e.stopPropagation(); hint.classList.toggle('collapsed'); hintToggle.textContent = hint.classList.contains('collapsed') ? '▼' : '▲'; scheduleSave(); });
 
     fontSlider.value = labelScale;
-    fontSlider.addEventListener('input', () => { labelScale = parseFloat(fontSlider.value); applyLabelScale(); scheduleSave(); });
+    fontSlider.addEventListener('input', () => { labelScale = parseFloat(fontSlider.value); applyLabelScale(); updatePositions(); scheduleSave(); });
 
     // Export/Import
     function exportJSON() {
       saveCurrentTabState();
-      const state = { tabs: tabs.map(tab => ({
-          name: tab.name,
-          nodes: tab.nodes,
-          edges: tab.edges,
-          groups: tab.groups,
-          nextId: tab.nextId,
-          nextGroupId: tab.nextGroupId,
-          transform: tab.transform,
-          labelScale: tab.labelScale,
-          undoStack: tab.undoStack,
-          redoStack: tab.redoStack
-        })), currentTabIndex, exportedAt: new Date().toISOString() };
+      const state = { tabs: serializeTabs(), currentTabIndex, exportedAt: new Date().toISOString() };
       const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
       const url = URL.createObjectURL(blob); const a=document.createElement('a');
       a.href=url; a.download=`mindflow-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(url); toast('✓ Backup descargado');
@@ -1005,29 +1198,13 @@
       if(!file)return; const reader=new FileReader();
       reader.onload=ev=>{ try{
         const s=JSON.parse(ev.target.result);
-        if(!s.tabs) throw new Error('Formato inválido');
+        if(!s.tabs || !Array.isArray(s.tabs) || !s.tabs.length) throw new Error('Formato inválido');
         if(!confirm(`¿Importar mapa con ${s.tabs.length} pestaña(s)?`)) return;
-        saveCurrentTabState();
-        tabs = s.tabs.map(t => ({
-          name: t.name,
-          nodes: t.nodes || [],
-          edges: t.edges || [],
-          groups: t.groups || [],
-          nextId: t.nextId || 1,
-          nextGroupId: t.nextGroupId || 1,
-          transform: t.transform || { x: wrap.clientWidth/2, y: wrap.clientHeight/2, scale: 1 },
-          labelScale: t.labelScale || 1,
-          undoStack: t.undoStack || [],
-          redoStack: t.redoStack || []
-        }));
-        currentTabIndex = s.currentTabIndex || 0;
+        tabs = normalizeTabs(s.tabs);
+        currentTabIndex = Math.min(s.currentTabIndex || 0, tabs.length - 1);
         loadTabState(currentTabIndex);
-        nodeElements.forEach(el => el.remove());
-        nodeElements.clear();
-        selectedIds.clear();
-        syncNodes();
+        resetCanvasView();
         scheduleSave();
-        renderTabs();
         toast(`✓ Importado: ${tabs.length} pestaña(s)`);
       }catch(e){ alert('Error al importar: '+e.message); } };
       reader.readAsText(file);
@@ -1047,55 +1224,240 @@
 
     // Inicialización
     function init() {
+      try { if (!localStorage.getItem('mindflow_tabs') && window.innerWidth < 720) { infoPanel.classList.add('collapsed'); hint.classList.add('collapsed'); } } catch (e) {}
       const loaded = loadState();
       if (!loaded) {
-        const defaultTab = createDefaultTabState('Pizarra 1');
-        tabs = [defaultTab];
+        tabs = [createDefaultTabState('Pizarra 1')];
         currentTabIndex = 0;
         loadTabState(0);
-        const rootId = addNodeInternal(null, '🧠 Mis tareas', 0, 0, 'root', '#ffffff');
-        const p1 = addNodeInternal(rootId, '💻 Trading Bot', -320, -200, 'child', '#818cf8');
-        addNodeInternal(p1, 'Backtest', -80, -120, 'grandchild', '#818cf8');
-        addNodeInternal(p1, 'Live test', -80, -50, 'grandchild', '#818cf8');
-        const p2 = addNodeInternal(rootId, '🎵 Música', 320, -200, 'child', '#f472b6');
-        addNodeInternal(p2, 'Beats nuevos', 80, -120, 'grandchild', '#f472b6');
-        addNodeInternal(p2, 'Mezcla', 80, -50, 'grandchild', '#f472b6');
-        const p3 = addNodeInternal(rootId, '🌐 Web', -320, 200, 'child', '#22d3ee');
-        addNodeInternal(p3, 'Portfolio', -80, 120, 'grandchild', '#22d3ee');
-        const p4 = addNodeInternal(rootId, '🏋️ Personal', 320, 200, 'child', '#4ade80');
-        addNodeInternal(p4, 'Gym', 80, 120, 'grandchild', '#4ade80');
-        addNodeInternal(p4, 'Sueño', 80, 180, 'grandchild', '#4ade80');
+        const rootId = addNodeInternal(null, '🧠 Mis tareas', 0, 0, 'root', '#ffffff', undefined, true);
+        const p1 = addNodeInternal(rootId, '💻 Trading Bot', -320, -200, 'child', '#818cf8', undefined, true);
+        addNodeInternal(p1, 'Backtest', -80, -120, 'grandchild', '#818cf8', undefined, true);
+        addNodeInternal(p1, 'Live test', -80, -50, 'grandchild', '#818cf8', undefined, true);
+        const p2 = addNodeInternal(rootId, '🎵 Música', 320, -200, 'child', '#f472b6', undefined, true);
+        addNodeInternal(p2, 'Beats nuevos', 80, -120, 'grandchild', '#f472b6', undefined, true);
+        addNodeInternal(p2, 'Mezcla', 80, -50, 'grandchild', '#f472b6', undefined, true);
+        const p3 = addNodeInternal(rootId, '🌐 Web', -320, 200, 'child', '#22d3ee', undefined, true);
+        addNodeInternal(p3, 'Portfolio', -80, 120, 'grandchild', '#22d3ee', undefined, true);
+        const p4 = addNodeInternal(rootId, '🏋️ Personal', 320, 200, 'child', '#4ade80', undefined, true);
+        addNodeInternal(p4, 'Gym', 80, 120, 'grandchild', '#4ade80', undefined, true);
+        addNodeInternal(p4, 'Sueño', 80, 180, 'grandchild', '#4ade80', undefined, true);
         saveCurrentTabState();
-        undoStack = [];
-        redoStack = [];
         scheduleSave();
       } else {
-        if (tabs.length === 0) {
-          tabs = [createDefaultTabState('Pizarra 1')];
-          currentTabIndex = 0;
-          loadTabState(0);
-          const rootId = addNodeInternal(null, '🧠 Mis tareas', 0, 0, 'root', '#ffffff');
-          saveCurrentTabState();
-        } else {
-          loadTabState(currentTabIndex);
-        }
+        loadTabState(currentTabIndex);
       }
-      transform.x = wrap.clientWidth/2; transform.y = wrap.clientHeight/2;
+      if (!loaded) { transform.x = wrap.clientWidth/2; transform.y = wrap.clientHeight/2; }
       syncNodes();
       renderTabs();
       document.getElementById('zoom-reset').textContent = Math.round(transform.scale*100)+'%';
       fontSlider.value = labelScale; applyLabelScale();
-      if (infoPanel.classList.contains('collapsed')) infoToggle.textContent = '▼'; else infoToggle.textContent = '▲';
-      if (hint.classList.contains('collapsed')) hintToggle.textContent = '▼'; else hintToggle.textContent = '▲';
-      console.log('🟢 init terminado. Tabs:', tabs.length);
-      // Forzamos un renderizado extra por seguridad
-      setTimeout(() => renderTabs(), 100);
+      infoToggle.textContent = infoPanel.classList.contains('collapsed') ? '▼' : '▲';
+      hintToggle.textContent = hint.classList.contains('collapsed') ? '▼' : '▲';
     }
 
     document.getElementById('add-tab-btn').addEventListener('click', () => createNewTab());
 
+    // Puente con la sincronización en la nube (módulo Firebase, más abajo)
+    function applyExternalData(d) {
+      saveCurrentTabState();
+      const old = tabs, nt = normalizeTabs(d.tabs);
+      nt.forEach((t, i) => { if (old[i]) { t.transform = old[i].transform; t.labelScale = old[i].labelScale; } });
+      tabs = nt;
+      currentTabIndex = Math.min(currentTabIndex, tabs.length - 1);
+      loadTabState(currentTabIndex);
+      resetCanvasView();
+      scheduleSave();
+    }
+    window.MindFlow = {
+      getData() { saveCurrentTabState(); return { tabs: serializeTabs(), currentTabIndex }; },
+      setData: applyExternalData,
+      backupLocal() { try { const raw = localStorage.getItem('mindflow_tabs'); if (raw) localStorage.setItem('mindflow_tabs_backup', raw); } catch (e) {} },
+      toast,
+      isBusy: () => editingId !== null || (dragging !== null && dragging !== undefined) || savePending,
+      onLocalSave: null,
+      authClick: null
+    };
+    document.getElementById('btn-auth').addEventListener('click', () => {
+      if (window.MindFlow.authClick) window.MindFlow.authClick();
+      else toast('No se pudo cargar Firebase (¿sin conexión?)');
+    });
+
     init();
   })();
+</script>
+
+<script type="module">
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // CONFIGURACIÓN DE FIREBASE: pega aquí los datos de tu proyecto
+  // (Firebase Console → Configuración del proyecto → Tus apps → Web)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_PROYECTO.firebaseapp.com",
+    projectId: "TU_PROYECTO",
+    storageBucket: "TU_PROYECTO.appspot.com",
+    messagingSenderId: "TU_SENDER_ID",
+    appId: "TU_APP_ID"
+  };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc, getDocs, collection, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+  const MF = window.MindFlow;
+  const $ = id => document.getElementById(id);
+  const authIcon = $('auth-icon'), authLabel = $('auth-label'), btnAuth = $('btn-auth');
+  const cloudStatus = $('cloud-status'), cloudDiv = $('cloud-div');
+  const googleSvg = authIcon.innerHTML;
+  const configured = !String(firebaseConfig.apiKey).startsWith('TU_');
+
+  if (!configured) {
+    MF.authClick = () => MF.toast('Falta pegar tu firebaseConfig en el código');
+  } else {
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const clientId = Math.random().toString(36).slice(2);
+
+    let user = null, unsubMeta = null, lastSaved = new Map(), lastCount = 0;
+    let syncTimer = null, applying = false, applyingRemote = false, lastRemoteStamp = 0;
+    const warned = new Set();
+
+    const metaRef = uid => doc(db, 'users', uid, 'meta', 'main');
+    const tabsCol = uid => collection(db, 'users', uid, 'tabs');
+    // En la nube no se guarda zoom/posición/tamaño de letra: es propio de cada dispositivo
+    const cloudShape = data => data.tabs.map(t => ({ name: t.name, nodes: t.nodes, edges: t.edges, groups: t.groups, nextId: t.nextId, nextGroupId: t.nextGroupId }));
+
+    function setCloud(text, color) { cloudStatus.textContent = text; cloudStatus.style.color = color || 'var(--text-muted)'; }
+
+    function renderAuth() {
+      if (user) {
+        authIcon.innerHTML = '';
+        if (user.photoURL) { const img = new Image(); img.src = user.photoURL; img.referrerPolicy = 'no-referrer'; img.width = img.height = 20; img.style.borderRadius = '50%'; authIcon.appendChild(img); }
+        else authIcon.textContent = '👤';
+        authLabel.textContent = 'Salir';
+        btnAuth.title = 'Salir (' + (user.email || 'cuenta Google') + ')';
+        cloudStatus.style.display = ''; cloudDiv.style.display = '';
+      } else {
+        authIcon.innerHTML = googleSvg;
+        authLabel.textContent = 'Entrar con Google';
+        btnAuth.title = 'Entrar con Google';
+        cloudStatus.style.display = 'none'; cloudDiv.style.display = 'none';
+      }
+    }
+
+    async function pushToCloud() {
+      if (!user || applying) return;
+      const tabs = cloudShape(MF.getData());
+      const batch = writeBatch(db);
+      const pending = new Map();
+      tabs.forEach((t, i) => {
+        const json = JSON.stringify(t);
+        if (lastSaved.get(i) === json) return;
+        if (json.length > 900000) {   // límite de Firestore: ~1 MiB por documento
+          if (!warned.has(t.name)) { warned.add(t.name); MF.toast('⚠️ "' + t.name + '" es demasiado grande para la nube (imágenes pesadas)'); }
+          return;
+        }
+        batch.set(doc(tabsCol(user.uid), 't' + i), { order: i, json });
+        pending.set(i, json);
+      });
+      let deletes = 0;
+      for (let i = tabs.length; i < lastCount; i++) { batch.delete(doc(tabsCol(user.uid), 't' + i)); deletes++; }
+      if (!pending.size && !deletes) return;
+      const stamp = Date.now();
+      batch.set(metaRef(user.uid), { count: tabs.length, updatedAt: stamp, by: clientId });
+      setCloud('☁ Subiendo…');
+      try {
+        await batch.commit();
+        pending.forEach((json, i) => lastSaved.set(i, json));
+        for (let i = tabs.length; i < lastCount; i++) lastSaved.delete(i);
+        lastCount = tabs.length; lastRemoteStamp = stamp;
+        setCloud('☁ Sincronizado', '#4ade80');
+      } catch (e) {
+        console.error(e); setCloud('☁ Error', '#f87171');
+        MF.toast('⚠️ No se pudo sincronizar con la nube');
+      }
+    }
+
+    async function pullFromCloud() {
+      const meta = await getDoc(metaRef(user.uid));
+      if (!meta.exists()) return null;
+      const snap = await getDocs(tabsCol(user.uid));
+      const arr = [];
+      snap.forEach(d => { const x = d.data(); try { arr[x.order] = JSON.parse(x.json); } catch (e) {} });
+      const tabs = arr.filter(Boolean);
+      return tabs.length ? { tabs, updatedAt: meta.data().updatedAt || 0 } : null;
+    }
+
+    function applyCloud(cloud) {
+      applying = true;
+      MF.setData({ tabs: cloud.tabs });
+      applying = false;
+      const shaped = cloudShape(MF.getData());
+      lastSaved = new Map(shaped.map((t, i) => [i, JSON.stringify(t)]));
+      lastCount = shaped.length; lastRemoteStamp = cloud.updatedAt;
+    }
+
+    async function applyRemote() {
+      if (applyingRemote) return;
+      applyingRemote = true;
+      try {
+        while (MF.isBusy()) await new Promise(r => setTimeout(r, 2500));   // no pisar lo que estás haciendo
+        const cloud = await pullFromCloud();
+        if (cloud) { applyCloud(cloud); setCloud('☁ Sincronizado', '#4ade80'); MF.toast('☁ Actualizado desde otro dispositivo'); }
+      } catch (e) { console.error(e); }
+      applyingRemote = false;
+    }
+
+    function listen() {
+      if (unsubMeta) unsubMeta();
+      unsubMeta = onSnapshot(metaRef(user.uid), snap => {
+        if (!snap.exists()) return;
+        const d = snap.data();
+        if (d.by === clientId || (d.updatedAt || 0) <= lastRemoteStamp) return;
+        applyRemote();
+      }, e => console.error(e));
+    }
+
+    MF.onLocalSave = () => { if (!user || applying) return; clearTimeout(syncTimer); syncTimer = setTimeout(pushToCloud, 1500); };
+
+    onAuthStateChanged(auth, async u => {
+      user = u; renderAuth();
+      if (!u) { if (unsubMeta) { unsubMeta(); unsubMeta = null; } return; }
+      setCloud('☁ Conectando…');
+      try {
+        const cloud = await pullFromCloud();
+        if (cloud) {
+          MF.backupLocal();   // copia de seguridad de lo que había en este dispositivo
+          applyCloud(cloud);
+          MF.toast('☁ Pizarras cargadas desde tu cuenta');
+        } else {
+          await pushToCloud();
+          MF.toast('☁ Tus pizarras se subieron a tu cuenta');
+        }
+        setCloud('☁ Sincronizado', '#4ade80');
+        listen();
+      } catch (e) {
+        console.error(e); setCloud('☁ Error', '#f87171');
+        MF.toast('⚠️ Error con la nube: revisa las reglas de Firestore');
+      }
+    });
+
+    async function signIn() {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      try { await signInWithPopup(auth, provider); }
+      catch (e) {
+        if (['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment', 'auth/web-storage-unsupported'].includes(e.code)) {
+          try { await signInWithRedirect(auth, provider); } catch (e2) { MF.toast('Error al entrar: ' + (e2.code || e2.message)); }
+        } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+          console.error(e); MF.toast('Error al entrar: ' + (e.code || e.message));
+        }
+      }
+    }
+    MF.authClick = () => { if (user) { if (confirm('¿Cerrar sesión? Tus pizarras seguirán guardadas en la nube y en este dispositivo.')) signOut(auth); } else signIn(); };
+  }
 </script>
 </body>
 </html>
