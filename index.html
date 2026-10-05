@@ -8,10 +8,10 @@
   <style>
     :root {
       --font-body: 'Inter', sans-serif;
-      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
-      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.25rem;
       --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
       --space-4: 1rem; --space-6: 1.5rem; --space-8: 2rem;
       --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
@@ -35,7 +35,7 @@
       --shadow-lg: 0 12px 40px rgba(0,0,0,0.2);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { -webkit-font-smoothing: antialiased; }
+    html { -webkit-font-smoothing: antialiased; font-size: 13px; /* tamaño base de toda la interfaz */ }
     button, input, textarea, select { font-family: inherit; }
     strong, th, h1, h2, h3 { font-weight: 400; }
     body { font-family: var(--font-body); background: var(--bg); color: var(--text); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; user-select: none; }
