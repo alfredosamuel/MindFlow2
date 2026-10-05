@@ -195,8 +195,6 @@
     /* Texto de nodos en Inter */
     .node-label, .node-edit-input { font-family: 'Inter', 'Satoshi', sans-serif; }
 
-    .node-check { width: 16px; height: 16px; border: 2px solid currentColor; border-radius: 4px; margin-right: 8px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; line-height: 1; cursor: pointer; }
-    @media (pointer: coarse) { .node-check { width: 22px; height: 22px; } }
     /* Barra de formato */
     #fmt-bar { position: absolute; top: var(--space-4); left: 50%; transform: translateX(-50%); display: none; align-items: center; gap: var(--space-1); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-full); padding: var(--space-1) var(--space-3); box-shadow: var(--shadow-lg); z-index: 60; }
     #fmt-bar.show { display: flex; }
@@ -289,7 +287,6 @@
     <div id="hint-content">
       <strong>⌨️ Shortcuts:</strong><br>
       <kbd>T</kbd> o <kbd>doble clic</kbd> en vacío: texto libre<br>
-      <kbd>K</kbd> texto con casilla (tachar)<br>
       <kbd>Enter</kbd> salto de línea (texto libre)<br>
       <kbd>Esc</kbd> terminar de escribir<br>
       <kbd>Ctrl+B</kbd> negrita · <kbd>Ctrl+I</kbd> cursiva<br>
@@ -419,8 +416,6 @@
         t.style.fontSize = node.fontSize ? `calc(var(--label-scale) * ${node.fontSize}px)` : '';
         t.style.fontWeight = node.bold === undefined ? '' : (node.bold ? 700 : 400);
         t.style.fontStyle = node.italic ? 'italic' : '';
-        t.style.textDecoration = node.done ? 'line-through' : '';
-        t.style.opacity = node.done ? '0.5' : '';
       });
     }
     function fmtTargets() {
@@ -719,14 +714,6 @@
       } else {
         styleTextNode(node, el);
         const lbl = document.createElement('div'); lbl.className = 'node-label'; lbl.textContent = node.label; el.appendChild(lbl);
-        if (node.todo) {   // casilla para tachar
-          const chk = document.createElement('span'); chk.className = 'node-check'; chk.textContent = node.done ? '✓' : '';
-          chk.addEventListener('click', e => {
-            e.stopPropagation(); pushUndo(); node.done = !node.done; chk.textContent = node.done ? '✓' : '';
-            applyFormat(node, el); scheduleSave();
-          });
-          el.insertBefore(chk, lbl);
-        }
       }
 
       const addBtn = document.createElement('button'); addBtn.className = 'node-add-btn'; addBtn.textContent = '+';
@@ -1022,7 +1009,6 @@
     document.addEventListener('keydown', e => {
       if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'){if(e.key==='Enter'&&e.target.id==='search-input'){e.preventDefault();jumpToSearchResult();}return;}
       if(e.key==='t'||e.key==='T'){e.preventDefault(); createTextAt(lastMousePos.x, lastMousePos.y);}
-      else if((e.key==='k'||e.key==='K')&&!e.ctrlKey&&!e.metaKey){e.preventDefault(); createTextAt(lastMousePos.x, lastMousePos.y, true);}
       else if((e.ctrlKey||e.metaKey)&&(e.key==='b'||e.key==='B')){e.preventDefault();toggleFmt('bold');}
       else if((e.ctrlKey||e.metaKey)&&(e.key==='i'||e.key==='I')){e.preventDefault();toggleFmt('italic');}
       else if((e.ctrlKey||e.metaKey)&&e.key==='g'){e.preventDefault(); openGroupModal();}
@@ -1037,9 +1023,9 @@
     function jumpToSearchResult(){ const q=document.getElementById('search-input').value.toLowerCase().trim(); if(!q)return; const match=nodes.find(n=>n.label.toLowerCase().includes(q)); if(match){ transform.x=wrap.clientWidth/2-match.x*transform.scale; transform.y=wrap.clientHeight/2-match.y*transform.scale; updatePositions(); scheduleSave(); } }
 
     // Texto libre (tecla T o doble clic en el vacío): aparece el cursor al instante, sin caja
-    function createTextAt(wx, wy, todo) {
+    function createTextAt(wx, wy) {
       const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-      const id = addFreeNode(wx, wy, '', color, todo ? { nodeKind: 'text', todo: true, done: false } : { nodeKind: 'text' });
+      const id = addFreeNode(wx, wy, '', color, { nodeKind: 'text' });
       syncNodes();
       const nodeEl = getNodeEl(id)?.querySelector('.node');
       if (nodeEl) startEdit(id, nodeEl);
